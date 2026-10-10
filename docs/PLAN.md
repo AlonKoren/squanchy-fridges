@@ -38,6 +38,7 @@ Each row of the sample hides a problem. Decision for each:
 
 - Readings are stored per logger, not per fridge. The fridge is looked up from the registry by time when analysing, so fixing a wrong assignment later fixes the history too.
 - Assignment `from` is inclusive, `to` exclusive. A time covered by no assignment (logger in transit) belongs to no fridge.
+- `loggers.json` is validated at startup and the app refuses to run on a mistake, listing all of them: duplicate IDs, unusable date formats, no assignments, `to` before `from`, one logger in two fridges at once, two loggers in one fridge at once. A wrong move date would otherwise silently put readings in the wrong fridge.
 
 ## Decisions: parser
 
