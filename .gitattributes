@@ -1,0 +1,2 @@
+# Sample logger files keep their exact bytes (CRLF), like real exports.
+sample-data/**/*.csv -text

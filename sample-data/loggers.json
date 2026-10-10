@@ -1,0 +1,332 @@
+[
+  {
+    "id": "TL-0512",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Jerusalem",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0513",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Jerusalem",
+        "fridge": "Cream cakes",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0514",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Jerusalem",
+        "fridge": "Display 1",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0417",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "assignments": [
+      {
+        "branch": "Tel Aviv",
+        "fridge": "Walk-in",
+        "from": "2024-01-01T00:00:00",
+        "to": "2026-09-16T10:00:00"
+      },
+      {
+        "branch": "Tel Aviv",
+        "fridge": "Display 2",
+        "from": "2026-09-16T10:30:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0418",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "assignments": [
+      {
+        "branch": "Tel Aviv",
+        "fridge": "Cream cakes",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0231",
+    "unit": "F",
+    "dateFormat": "dd/MM/yyyy HH:mm",
+    "assignments": [
+      {
+        "branch": "Haifa",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0232",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Haifa",
+        "fridge": "Cream cakes",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0233",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Haifa",
+        "fridge": "Display 1",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0388",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Rishon LeZion",
+        "fridge": "Cream cakes",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0389",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Rishon LeZion",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0390",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Rishon LeZion",
+        "fridge": "Walk-in",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0601",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Petah Tikva",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0602",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Petah Tikva",
+        "fridge": "Cream cakes",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0611",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Ashdod",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0612",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Ashdod",
+        "fridge": "Walk-in",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0621",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Netanya",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0622",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Netanya",
+        "fridge": "Display 1",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0631",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Be'er Sheva",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0632",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Be'er Sheva",
+        "fridge": "Display 1",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0641",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Holon",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0642",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Holon",
+        "fridge": "Walk-in",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0651",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Ramat Gan",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0652",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Ramat Gan",
+        "fridge": "Cream cakes",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0661",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "assignments": [
+      {
+        "branch": "Herzliya",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0662",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd'T'HH:mm:ss",
+    "assignments": [
+      {
+        "branch": "Herzliya",
+        "fridge": "Display 1",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0671",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Kfar Saba",
+        "fridge": "Dairy",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  },
+  {
+    "id": "TL-0672",
+    "unit": "C",
+    "dateFormat": "yyyy-MM-dd HH:mm",
+    "assignments": [
+      {
+        "branch": "Kfar Saba",
+        "fridge": "Display 1",
+        "from": "2024-01-01T00:00:00"
+      }
+    ]
+  }
+]

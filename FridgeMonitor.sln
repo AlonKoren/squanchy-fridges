@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FridgeMonitor.Web", "Fridge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FridgeMonitor.Tests", "FridgeMonitor.Tests\FridgeMonitor.Tests.csproj", "{9CE43FA6-9974-4B4D-8760-6FACB18FF4BD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{17F75A99-786E-47CE-A702-1F3C379BEE03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SampleDataGen", "tools\SampleDataGen\SampleDataGen.csproj", "{C2DE97F2-357C-4528-A556-2F2CF12EC87B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +34,12 @@ Global
 		{9CE43FA6-9974-4B4D-8760-6FACB18FF4BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CE43FA6-9974-4B4D-8760-6FACB18FF4BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CE43FA6-9974-4B4D-8760-6FACB18FF4BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2DE97F2-357C-4528-A556-2F2CF12EC87B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2DE97F2-357C-4528-A556-2F2CF12EC87B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2DE97F2-357C-4528-A556-2F2CF12EC87B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2DE97F2-357C-4528-A556-2F2CF12EC87B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C2DE97F2-357C-4528-A556-2F2CF12EC87B} = {17F75A99-786E-47CE-A702-1F3C379BEE03}
 	EndGlobalSection
 EndGlobal

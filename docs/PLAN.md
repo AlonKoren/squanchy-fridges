@@ -26,6 +26,14 @@ Each row of the sample hides a problem. Decision for each:
 | "On my phone" | Mobile | Mobile-first UI. |
 | Inspector question | Excursion report | Per-fridge excursions (start, end, duration, peak), filter by date, export CSV. |
 
+## Decisions from building the sample data
+
+- Logger ID comes from the file name (`TL-0512_2026-09-14.csv`). The old Haifa model has no ID in the name, so fall back to its preamble line `Logger ID;TL-0231`.
+- When a logger moves, the registry has a hole between "unplugged" and "clipped in" (TL-0417: 10:00–10:30). Readings in that hole belong to no fridge. Report them as "unassigned", never count them against either fridge. Otherwise the 21°C readings while carrying it would show as an alarm.
+- After TL-0417 moved, the Tel Aviv Walk-in has no logger. The dashboard should say so, not quietly drop the fridge.
+- "Now" for status = the latest reading across all uploads, not the wall clock. Files arrive weekly, so wall-clock "now" would make everything look stale.
+- Summer says ~3000 rows a week. 12 branches × ~3 fridges × every 15 min is ~24,000. Either the interval is longer or she pastes only part. Question for Summer. Sample data uses 15 min, as in her sample.
+
 ## Architecture
 
 - `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.
