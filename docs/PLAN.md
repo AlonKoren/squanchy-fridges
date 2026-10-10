@@ -46,6 +46,14 @@ Each row of the sample hides a problem. Decision for each:
 - Duplicate (logger, time) rows: keep the first. Same time with a different value → warning.
 - One bad row is reported with its line number; the rest of the file is still imported.
 
+## Decisions: analysis
+
+- Excursion = run of readings strictly above 5.0°C. Duration = first reading above → first reading back under. If a gap falls inside, it's flagged "includes missing data".
+- Brief vs alarm is by duration (< 30 min), not reading count, so it still works if a logger reads every 5 minutes.
+- Status is the worst thing that happened in the period, not just right now. Summer reviews weekly; a fridge that was above 5 for 30h on Monday must not show green on Sunday. The reason text says "now" vs "was".
+- Trend uses Theil–Sen (median of pairwise slopes) over the last 3h, so a single door spike doesn't look like warming.
+- A single ERR (30-min step) isn't a gap; two in a row is. ERR readings themselves make the fridge orange.
+
 ## Architecture
 
 - `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.
@@ -57,10 +65,10 @@ Core separate so the logic is testable without the web layer.
 
 ## Status rules (to confirm with Summer; configurable in appsettings.json)
 
-- Red / Alarm: 2+ consecutive valid readings above 5°C (~30 min), or an ongoing excursion.
-- Orange / Warning: rising trend over the last 3h (slope > 0.5°C/h) while under 5°C; recent gap; error readings.
+- Red / Alarm: above 5°C for 30 min or more (now or earlier in the period).
+- Orange / Warning: warming > 0.5°C/h over the last 3h while under 5°C; one reading above 5 at the end; gaps; logger stopped; ERR readings; no logger in the fridge.
 - Green / OK: otherwise. Brief spikes are shown but don't change the colour.
-- Grey / No data: no readings in the last 7 days.
+- Grey / No data: no readings in the period.
 
 ## Order of work
 
