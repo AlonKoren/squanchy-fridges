@@ -1,10 +1,66 @@
-﻿@page
+@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@if (Model.Fleet is null)
+{
+    <h1>No readings yet</h1>
+    <div class="panel">
+        <p>Upload the logger files the branch managers emailed, or Summer's combined sheet.</p>
+        <p><a class="button" asp-page="/Upload">Upload files</a></p>
+        <form method="post" asp-page-handler="LoadSample">
+            <p class="muted">Trying it out? Load the made-up week in <code>sample-data/</code>.</p>
+            <button class="secondary" type="submit">Load sample week</button>
+        </form>
+    </div>
+}
+else
+{
+    var fridges = Model.Fleet.Fridges;
+    var problems = fridges.Where(f => f.Status != FridgeStatus.Ok).ToList();
+    var ok = fridges.Where(f => f.Status == FridgeStatus.Ok).ToList();
+
+    <h1>How every fridge is doing</h1>
+    <p class="muted">7 days up to the latest reading, @Fmt.Time(Model.Fleet.AsOf).</p>
+
+    <div class="summary">
+        @foreach (var group in fridges.GroupBy(f => f.Status).OrderBy(g => g.Key))
+        {
+            <span class="badge status-@StatusUi.Css(group.Key)">@group.Count() @StatusUi.Label(group.Key)</span>
+        }
+    </div>
+
+    @if (problems.Count > 0)
+    {
+        <div class="cards">
+            @foreach (var f in problems)
+            {
+                <partial name="_FridgeCard" model="f" />
+            }
+        </div>
+    }
+
+    @if (ok.Count > 0)
+    {
+        <details class="ok-list" open="@(problems.Count == 0)">
+            <summary>@ok.Count fridge@(ok.Count == 1 ? "" : "s") OK</summary>
+            <div class="cards">
+                @foreach (var f in ok)
+                {
+                    <partial name="_FridgeCard" model="f" />
+                }
+            </div>
+        </details>
+    }
+
+    @if (Model.Fleet.Unassigned.Count > 0)
+    {
+        var loggers = string.Join(", ", Model.Fleet.Unassigned.Select(r => r.LoggerId).Distinct());
+        <p class="muted">
+            @Model.Fleet.Unassigned.Count reading(s) from @loggers were taken while the logger wasn't in any fridge
+            (for example while being moved). They don't count for any fridge.
+        </p>
+    }
+}

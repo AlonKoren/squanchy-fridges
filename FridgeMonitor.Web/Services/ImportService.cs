@@ -56,6 +56,15 @@ public sealed class ImportService(FridgeDb db, LoggerRegistry registry)
         return upload;
     }
 
+    /// <summary>Imports every .csv in a folder (the "Load sample week" button).</summary>
+    public async Task<List<Upload>> ImportFolderAsync(string folder)
+    {
+        var uploads = new List<Upload>();
+        foreach (var path in Directory.GetFiles(folder, "*.csv").Order())
+            uploads.Add(await ImportAsync(Path.GetFileName(path), await File.ReadAllTextAsync(path)));
+        return uploads;
+    }
+
     /// <summary>Raw values already stored for these loggers in this time range, keyed by (logger, time).</summary>
     async Task<Dictionary<(string, DateTime), string>> StoredValuesAsync(List<Reading> readings)
     {

@@ -1,0 +1,57 @@
+@page
+@model ReportModel
+@{
+    ViewData["Title"] = "Inspector report";
+    var withExcursions = Model.Reports.Where(r => r.Excursions.Count > 0).ToList();
+}
+
+<h1>When was it above @Fmt.Temp(Model.LimitC), and for how long?</h1>
+
+<form method="get" class="inline">
+    <label>Fridge
+        <select name="f">
+            <option value="">All fridges</option>
+            @foreach (var f in Model.AllFridges)
+            {
+                <option value="@ReportModel.Value(f)" selected="@(ReportModel.Value(f) == Model.F)">@f</option>
+            }
+        </select>
+    </label>
+    <label>From <input type="date" name="from" value="@Model.Range.FirstIso" /></label>
+    <label>To <input type="date" name="to" value="@Model.Range.LastIso" /></label>
+    <button type="submit">Show</button>
+    <a class="button secondary" asp-page-handler="Csv" asp-route-f="@Model.F"
+       asp-route-from="@Model.Range.FirstIso" asp-route-to="@Model.Range.LastIso">Export CSV</a>
+    <button type="button" class="secondary" onclick="window.print()">Print</button>
+</form>
+
+<p class="muted">
+    @(Model.Range).
+    Each period runs from the first reading above @Fmt.Temp(Model.LimitC) to the first reading back under it,
+    so times are accurate to the logger's reading interval (15 minutes for most loggers).
+    "Brief" means back under within @Model.MinExcursionMinutes minutes, usually a door opening.
+</p>
+
+@if (withExcursions.Count == 0)
+{
+    <div class="panel status-ok">No readings above @Fmt.Temp(Model.LimitC) in this period.</div>
+}
+@foreach (var r in withExcursions)
+{
+    var real = r.Excursions.Where(e => !e.IsBrief).ToList();
+    var total = TimeSpan.FromTicks(real.Sum(e => e.Duration.Ticks));
+    <h2>@r.Fridge</h2>
+    <p class="muted">
+        @real.Count time(s) above the limit, @Fmt.Duration(total) in total.
+        @(r.Excursions.Count - real.Count) brief spike(s).
+    </p>
+    <partial name="_ExcursionTable" model="r.Excursions" />
+}
+
+@{
+    var empty = Model.Reports.Where(r => r.LastValid is null).Select(r => r.Fridge.ToString()).ToList();
+}
+@if (empty.Count > 0)
+{
+    <p class="muted">No readings in this period for: @string.Join(", ", empty).</p>
+}

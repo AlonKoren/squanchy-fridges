@@ -1,4 +1,5 @@
 using FridgeMonitor.Core;
+using FridgeMonitor.Web;
 using FridgeMonitor.Web.Data;
 using FridgeMonitor.Web.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ builder.Services.AddSingleton(LoggerRegistry.FromJson(File.ReadAllText(registryP
 builder.Services.Configure<AnalysisOptions>(builder.Configuration.GetSection("Analysis"));
 builder.Services.AddDbContext<FridgeDb>(o =>
     o.UseSqlite($"Data Source={FromProject(builder.Configuration["Database:Path"]!)}"));
+builder.Services.AddSingleton(new SampleDataFolder(FromProject(builder.Configuration["SampleData:Path"]!)));
 builder.Services.AddScoped<ImportService>();
 builder.Services.AddScoped<FleetService>();
 

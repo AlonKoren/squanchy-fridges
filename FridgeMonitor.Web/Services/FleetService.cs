@@ -25,12 +25,12 @@ public sealed class FleetService(FridgeDb db, LoggerRegistry registry, IOptions<
     }
 
     /// <summary>One fridge between two times, e.g. for the inspector. Uses whichever loggers were in it then.</summary>
-    public async Task<FridgeReport> GetFridgeAsync(FridgeKey fridge, DateTime from, DateTime to)
+    public async Task<(FridgeReport Report, List<Reading> Readings)> GetFridgeAsync(FridgeKey fridge, DateTime from, DateTime to)
     {
         var readings = await GetReadingsAsync(fridge, from, to);
         var latest = await LatestReadingAsync() ?? to;
         var asOf = latest < to ? latest : to;
-        return FridgeAnalyzer.Analyze(fridge, readings, asOf, Options, registry.UnmonitoredSince(fridge, asOf));
+        return (FridgeAnalyzer.Analyze(fridge, readings, asOf, Options, registry.UnmonitoredSince(fridge, asOf)), readings);
     }
 
     public async Task<List<Reading>> GetReadingsAsync(FridgeKey fridge, DateTime from, DateTime to)

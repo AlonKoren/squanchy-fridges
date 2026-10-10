@@ -1,19 +1,19 @@
+using FridgeMonitor.Core;
+using FridgeMonitor.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FridgeMonitor.Web.Pages;
 
-public class IndexModel : PageModel
+public class IndexModel(FleetService fleet, ImportService import, SampleDataFolder sample) : PageModel
 {
-    private readonly ILogger<IndexModel> _logger;
+    public FleetReport? Fleet { get; private set; }
 
-    public IndexModel(ILogger<IndexModel> logger)
+    public async Task OnGetAsync() => Fleet = await fleet.GetFleetAsync();
+
+    public async Task<IActionResult> OnPostLoadSampleAsync()
     {
-        _logger = logger;
-    }
-
-    public void OnGet()
-    {
-
+        await import.ImportFolderAsync(sample.Path);
+        return RedirectToPage();
     }
 }

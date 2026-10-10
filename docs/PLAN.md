@@ -64,6 +64,17 @@ Each row of the sample hides a problem. Decision for each:
 - A file is treated as Summer's combined sheet if it has a Logger column next to Time and Temp; otherwise it's a single logger export.
 - Analysis loads the last 7 days into memory. ~24k rows/week is nothing; years of data would need per-fridge queries or pre-computed excursions.
 
+## Decisions: UI
+
+- Razor Pages, server-rendered, no JavaScript framework. Fast on a phone, nothing to build.
+- Dropped the template's Bootstrap/jQuery. A ~100-line mobile-first stylesheet: one column of cards on a phone, 2–3 on wider screens.
+- Chart is SVG drawn on the server (`TempChart`). No CDN or chart library, so it works offline. The line breaks at gaps and ERR instead of drawing across missing data; every reading above 5 gets a red dot, so brief spikes are visible but labelled.
+- Dashboard: problems first (Alarm, Check, No data), OK fridges collapsed below. Each card shows the current temperature, when it was read, and the reasons in plain words. Colour always comes with a text label.
+- "Warning" is labelled "Check" for Summer: it means "look at this", not "something broke".
+- Inspector report: pick one fridge or all, a date range, then print or export CSV. CSV has a BOM so Excel shows ° and Hebrew-safe UTF-8 correctly. Brief spikes are listed and labelled, not hidden: an inspector should see everything.
+- Empty dashboard offers "Load sample week" so a reviewer sees a working app in one click.
+- Uploads over 5 MB are rejected (a week from one logger is ~20 KB).
+
 ## Architecture
 
 - `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.

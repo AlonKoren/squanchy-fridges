@@ -1,0 +1,60 @@
+@page
+@model FridgeModel
+@{
+    ViewData["Title"] = Model.Key.ToString();
+    var r = Model.Report;
+}
+
+<p class="muted"><a asp-page="/Index">← Dashboard</a></p>
+<h1>@Model.Key.Fridge <span class="muted">@Model.Key.Branch</span></h1>
+
+<form method="get" class="inline">
+    <input type="hidden" name="branch" value="@Model.Key.Branch" />
+    <input type="hidden" name="fridge" value="@Model.Key.Fridge" />
+    <label>From <input type="date" name="from" value="@Model.Range.FirstIso" /></label>
+    <label>To <input type="date" name="to" value="@Model.Range.LastIso" /></label>
+    <button type="submit">Show</button>
+</form>
+
+<div class="panel status-@StatusUi.Css(r.Status)">
+    <span class="badge status-@StatusUi.Css(r.Status)">@StatusUi.Label(r.Status)</span>
+    @if (r.LastValid is { } last)
+    {
+        <strong>@Fmt.Temp(last.TempC!.Value)</strong> <span class="muted">at @Fmt.Time(last.Time)</span>
+    }
+    @if (r.Reasons.Count > 0)
+    {
+        <ul class="reasons">
+            @foreach (var reason in r.Reasons.OrderBy(x => x.Level)) { <li>@reason.Text</li> }
+        </ul>
+    }
+</div>
+
+@Model.Chart
+<p class="muted">Dashed line: @Fmt.Temp(Model.LimitC) limit. Red dots: readings above it. Breaks in the line: missing data.</p>
+
+<h2>Times above @Fmt.Temp(Model.LimitC)</h2>
+@if (r.Excursions.Count == 0)
+{
+    <p>None in this period.</p>
+}
+else
+{
+    <partial name="_ExcursionTable" model="r.Excursions" />
+}
+<p><a asp-page="/Report" asp-route-f="@($"{Model.Key.Branch}|{Model.Key.Fridge}")"
+      asp-route-from="@Model.Range.FirstIso" asp-route-to="@Model.Range.LastIso">Inspector report for this fridge</a></p>
+
+<h2>Missing data</h2>
+@if (r.Gaps.Count == 0 && r.ErrorReadings == 0)
+{
+    <p>No gaps or error readings.</p>
+}
+else
+{
+    <p class="muted">The logger files can't say why data is missing (battery, crash, not saved), so this just shows where.</p>
+    <ul>
+        @foreach (var g in r.Gaps) { <li>@Fmt.Duration(g.Length) with no readings: @Fmt.Time(g.From) – @Fmt.Time(g.To)</li> }
+        @if (r.ErrorReadings > 0) { <li>@r.ErrorReadings reading(s) where the logger wrote ERR</li> }
+    </ul>
+}

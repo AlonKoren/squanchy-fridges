@@ -1,0 +1,70 @@
+@page
+@model UploadModel
+@{
+    ViewData["Title"] = "Upload";
+}
+
+<h1>Upload logger files</h1>
+<div class="panel">
+    <form method="post" enctype="multipart/form-data">
+        <p>Pick one or more files: the logger exports from the branch managers, or your combined sheet saved as CSV.
+           Uploading the same file twice is safe.</p>
+        <p><input type="file" name="files" multiple accept=".csv,.txt,text/csv" required /></p>
+        <button type="submit">Upload</button>
+    </form>
+    <form method="post" asp-page-handler="Sample" class="no-print">
+        <p class="muted">Or load the made-up week from <code>sample-data/logger-files</code>:
+            <button class="secondary" type="submit">Load sample week</button></p>
+    </form>
+</div>
+
+@if (Model.Results.Count > 0)
+{
+    <h2>Result</h2>
+    <p>
+        @Model.Results.Sum(u => u.Imported) new readings from @Model.Results.Count file(s).
+        <a asp-page="/Index">Go to the dashboard</a>
+    </p>
+    @foreach (var u in Model.Results)
+    {
+        var errors = u.Issues.Count(i => i.Severity == IssueSeverity.Error);
+        <div class="panel @(errors > 0 && u.Imported == 0 ? "status-alarm" : u.Issues.Count > 0 ? "status-warning" : "")">
+            <strong>@u.FileName</strong> @(u.LoggerId is null ? "" : $"({u.LoggerId})")
+            <div class="muted">
+                @u.Imported imported
+                @if (u.AlreadyStored > 0) { <text>· @u.AlreadyStored already stored</text> }
+                @if (u.DuplicatesInFile > 0) { <text>· @u.DuplicatesInFile duplicate rows in the file</text> }
+            </div>
+            @if (u.Issues.Count > 0)
+            {
+                <ul class="issues">
+                    @foreach (var issue in u.Issues.Take(10))
+                    {
+                        <li class="@issue.Severity">@(issue.Line is null ? "" : $"Line {issue.Line}: ")@issue.Message</li>
+                    }
+                    @if (u.Issues.Count > 10) { <li>…and @(u.Issues.Count - 10) more</li> }
+                </ul>
+            }
+        </div>
+    }
+}
+
+@if (Model.Recent.Count > 0)
+{
+    <h2>Recent uploads</h2>
+    <div class="table-wrap">
+        <table>
+            <tr><th>When</th><th>File</th><th>Logger</th><th class="num">New</th><th class="num">Already stored</th></tr>
+            @foreach (var u in Model.Recent)
+            {
+                <tr>
+                    <td>@Fmt.Time(u.UploadedAt)</td>
+                    <td>@u.FileName</td>
+                    <td>@(u.LoggerId ?? "sheet")</td>
+                    <td class="num">@u.Imported</td>
+                    <td class="num">@u.AlreadyStored</td>
+                </tr>
+            }
+        </table>
+    </div>
+}
