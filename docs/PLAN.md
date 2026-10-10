@@ -34,6 +34,11 @@ Each row of the sample hides a problem. Decision for each:
 - "Now" for status = the latest reading across all uploads, not the wall clock. Files arrive weekly, so wall-clock "now" would make everything look stale.
 - Summer says ~3000 rows a week. 12 branches × ~3 fridges × every 15 min is ~24,000. Either the interval is longer or she pastes only part. Question for Summer. Sample data uses 15 min, as in her sample.
 
+## Decisions: logger registry
+
+- Readings are stored per logger, not per fridge. The fridge is looked up from the registry by time when analysing, so fixing a wrong assignment later fixes the history too.
+- Assignment `from` is inclusive, `to` exclusive. A time covered by no assignment (logger in transit) belongs to no fridge.
+
 ## Architecture
 
 - `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.
