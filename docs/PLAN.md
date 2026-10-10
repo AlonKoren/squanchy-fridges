@@ -39,6 +39,13 @@ Each row of the sample hides a problem. Decision for each:
 - Readings are stored per logger, not per fridge. The fridge is looked up from the registry by time when analysing, so fixing a wrong assignment later fixes the history too.
 - Assignment `from` is inclusive, `to` exclusive. A time covered by no assignment (logger in transit) belongs to no fridge.
 
+## Decisions: parser
+
+- Dates: logger's configured format first, then only year-first ISO formats. A day-first/month-first guess never happens.
+- Unit comes only from the registry. If the file header names a unit that disagrees, or the median reading is above 15°C, the upload shows a warning. No silent auto-conversion.
+- Duplicate (logger, time) rows: keep the first. Same time with a different value → warning.
+- One bad row is reported with its line number; the rest of the file is still imported.
+
 ## Architecture
 
 - `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.
