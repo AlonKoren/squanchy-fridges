@@ -14,7 +14,7 @@ public static class TempChart
     const double W = 800, H = 260, Left = 34, Right = 8, Top = 10, Bottom = 26;
     static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
 
-    public static HtmlString Render(IReadOnlyList<Reading> readings, DateTime from, DateTime to, double limitC, TimeSpan gapThreshold)
+    public static HtmlString Render(IReadOnlyList<Reading> readings, DateTime from, DateTime to, double limitC, TimeSpan gapThreshold, string summary)
     {
         var temps = readings.Where(r => !r.IsError).Select(r => r.TempC!.Value).ToList();
         double min = Math.Floor(Math.Min(0, temps.DefaultIfEmpty(0).Min()));
@@ -26,7 +26,8 @@ public static class TempChart
         static string N(double v) => v.ToString("0.#", Inv);
 
         var svg = new StringBuilder();
-        svg.Append("<svg viewBox=\"0 0 800 260\" class=\"chart\" role=\"img\" aria-label=\"Temperature over time\">");
+        svg.Append("<svg viewBox=\"0 0 800 260\" class=\"chart\" role=\"img\" aria-label=\"")
+           .Append(System.Net.WebUtility.HtmlEncode(summary)).Append("\">");
 
         // Horizontal grid with °C labels.
         double step = max - min > 12 ? 5 : 2;

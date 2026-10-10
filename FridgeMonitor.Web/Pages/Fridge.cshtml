@@ -3,10 +3,13 @@
 @{
     ViewData["Title"] = Model.Key.ToString();
     var r = Model.Report;
+    var css = StatusUi.Css(r.Status);
 }
 
 <p class="muted"><a asp-page="/Index">← Dashboard</a></p>
-<h1>@Model.Key.Fridge <span class="muted">@Model.Key.Branch</span></h1>
+<div class="page-head">
+    <h1>@Model.Key.Fridge <span class="muted">· @Model.Key.Branch</span></h1>
+</div>
 
 <form method="get" class="inline">
     <input type="hidden" name="branch" value="@Model.Key.Branch" />
@@ -16,12 +19,14 @@
     <button type="submit">Show</button>
 </form>
 
-<div class="panel status-@StatusUi.Css(r.Status)">
-    <span class="badge status-@StatusUi.Css(r.Status)">@StatusUi.Label(r.Status)</span>
-    @if (r.LastValid is { } last)
-    {
-        <strong>@Fmt.Temp(last.TempC!.Value)</strong> <span class="muted">at @Fmt.Time(last.Time)</span>
-    }
+<div class="panel status-@css">
+    <div class="status-line">
+        <span class="badge status-@css">@StatusUi.Icon(r.Status) @StatusUi.Label(r.Status)</span>
+        @if (r.LastValid is { } last)
+        {
+            <span class="temp">@Fmt.Temp(last.TempC!.Value)</span> <span class="muted">at @Fmt.Time(last.Time)</span>
+        }
+    </div>
     @if (r.Reasons.Count > 0)
     {
         <ul class="reasons">
@@ -31,6 +36,15 @@
 </div>
 
 @Model.Chart
+@if (Model.Stats is { } s)
+{
+    <p class="chart-summary">
+        <span>Lowest <strong>@Fmt.Temp(s.Min)</strong></span>
+        <span>Highest <strong>@Fmt.Temp(s.Max)</strong></span>
+        <span>Average <strong>@Fmt.Temp(s.Avg)</strong></span>
+        <span>Above @Fmt.Temp(Model.LimitC) <strong>@Fmt.Duration(s.Above)</strong></span>
+    </p>
+}
 <p class="muted">Dashed line: @Fmt.Temp(Model.LimitC) limit. Red dots: readings above it. Breaks in the line: missing data.</p>
 
 <h2>Times above @Fmt.Temp(Model.LimitC)</h2>
@@ -42,8 +56,10 @@ else
 {
     <partial name="_ExcursionTable" model="r.Excursions" />
 }
-<p><a asp-page="/Report" asp-route-f="@($"{Model.Key.Branch}|{Model.Key.Fridge}")"
-      asp-route-from="@Model.Range.FirstIso" asp-route-to="@Model.Range.LastIso">Inspector report for this fridge</a></p>
+<div class="actions">
+    <a class="button secondary" asp-page="/Report" asp-route-f="@($"{Model.Key.Branch}|{Model.Key.Fridge}")"
+       asp-route-from="@Model.Range.FirstIso" asp-route-to="@Model.Range.LastIso">Inspector report for this fridge</a>
+</div>
 
 <h2>Missing data</h2>
 @if (r.Gaps.Count == 0 && r.ErrorReadings == 0)

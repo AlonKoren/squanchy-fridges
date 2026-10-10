@@ -1,18 +1,23 @@
+@{
+    var current = ViewContext.RouteData.Values["page"]?.ToString();
+    string? Current(string page) => current == page ? "page" : null;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1e293b" />
     <title>@ViewData["Title"] · Squanchy fridges</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <header class="topbar">
-        <a class="brand" asp-page="/Index">Squanchy fridges</a>
-        <nav>
-            <a asp-page="/Index">Dashboard</a>
-            <a asp-page="/Upload">Upload</a>
-            <a asp-page="/Report">Inspector</a>
+        <a class="brand" asp-page="/Index">@StatusUi.Thermometer Squanchy fridges</a>
+        <nav aria-label="Main">
+            <a asp-page="/Index" aria-current="@Current("/Index")">Dashboard</a>
+            <a asp-page="/Upload" aria-current="@Current("/Upload")">Upload</a>
+            <a asp-page="/Report" aria-current="@Current("/Report")">Inspector</a>
         </nav>
     </header>
     <main class="page">

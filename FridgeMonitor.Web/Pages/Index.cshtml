@@ -8,12 +8,14 @@
 {
     <h1>No readings yet</h1>
     <div class="panel">
-        <p>Upload the logger files the branch managers emailed, or Summer's combined sheet.</p>
-        <p><a class="button" asp-page="/Upload">Upload files</a></p>
-        <form method="post" asp-page-handler="LoadSample">
-            <p class="muted">Trying it out? Load the made-up week in <code>sample-data/</code>.</p>
-            <button class="secondary" type="submit">Load sample week</button>
-        </form>
+        <p>Upload the logger files the branch managers emailed, or your combined sheet.</p>
+        <div class="actions">
+            <a class="button" asp-page="/Upload">Upload files</a>
+            <form method="post" asp-page-handler="LoadSample">
+                <button class="secondary" type="submit">Load sample week</button>
+            </form>
+        </div>
+        <p class="muted">"Load sample week" imports the made-up files in <code>sample-data/</code>, for trying the app out.</p>
     </div>
 }
 else
@@ -22,18 +24,24 @@ else
     var problems = fridges.Where(f => f.Status != FridgeStatus.Ok).ToList();
     var ok = fridges.Where(f => f.Status == FridgeStatus.Ok).ToList();
 
-    <h1>How every fridge is doing</h1>
-    <p class="muted">7 days up to the latest reading, @Fmt.Time(Model.Fleet.AsOf).</p>
+    <div class="page-head">
+        <h1>How every fridge is doing</h1>
+        <span class="muted">7 days up to the latest reading, @Fmt.Time(Model.Fleet.AsOf)</span>
+    </div>
 
-    <div class="summary">
-        @foreach (var group in fridges.GroupBy(f => f.Status).OrderBy(g => g.Key))
+    <div class="tiles">
+        @foreach (var status in Enum.GetValues<FridgeStatus>())
         {
-            <span class="badge status-@StatusUi.Css(group.Key)">@group.Count() @StatusUi.Label(group.Key)</span>
+            <div class="tile status-@StatusUi.Css(status)">
+                <span class="tile-count">@fridges.Count(f => f.Status == status)</span>
+                <span class="tile-label">@StatusUi.Icon(status) @StatusUi.Label(status)</span>
+            </div>
         }
     </div>
 
     @if (problems.Count > 0)
     {
+        <h2 class="sr-only">Needs attention</h2>
         <div class="cards">
             @foreach (var f in problems)
             {

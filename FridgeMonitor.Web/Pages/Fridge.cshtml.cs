@@ -19,6 +19,9 @@ public class FridgeModel(FleetService fleet, LoggerRegistry registry) : PageMode
     public HtmlString Chart { get; private set; } = HtmlString.Empty;
     public double LimitC => fleet.Options.LimitC;
 
+    /// <summary>Text alternative for the chart: lowest, highest, average and time above the limit.</summary>
+    public (double Min, double Max, double Avg, TimeSpan Above)? Stats { get; private set; }
+
     public async Task<IActionResult> OnGetAsync()
     {
         var key = registry.AllFridges.FirstOrDefault(f => Names.Same(f.Branch, Branch) && Names.Same(f.Fridge, Fridge));
@@ -30,8 +33,17 @@ public class FridgeModel(FleetService fleet, LoggerRegistry registry) : PageMode
         Report = report;
 
         var valid = readings.Where(r => !r.IsError).ToList();
+        string summary = $"Temperature chart, {Range}: no readings.";
+        if (valid.Count > 0)
+        {
+            var temps = valid.Select(r => r.TempC!.Value).ToList();
+            var above = TimeSpan.FromTicks(report.Excursions.Where(e => !e.IsBrief).Sum(e => e.Duration.Ticks));
+            Stats = (temps.Min(), temps.Max(), temps.Average(), above);
+            summary = $"Temperature chart, {Range}: lowest {Fmt.Temp(temps.Min())}, highest {Fmt.Temp(temps.Max())}, " +
+                      $"average {Fmt.Temp(temps.Average())}, {Fmt.Duration(above)} above {Fmt.Temp(LimitC)}.";
+        }
         var gapThreshold = FridgeAnalyzer.ExpectedInterval(valid) * fleet.Options.GapFactor;
-        Chart = TempChart.Render(readings, Range.Start, Range.End, LimitC, gapThreshold);
+        Chart = TempChart.Render(readings, Range.Start, Range.End, LimitC, gapThreshold, summary);
         return Page();
     }
 }

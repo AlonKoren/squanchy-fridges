@@ -1,7 +1,10 @@
 @model IEnumerable<Excursion>
 <div class="table-wrap">
     <table>
-        <tr><th>From</th><th>Until</th><th class="num">How long</th><th class="num">Peak</th><th>Note</th></tr>
+        <thead>
+            <tr><th>From</th><th>Until</th><th class="num">How long</th><th class="num">Peak</th><th>Note</th></tr>
+        </thead>
+        <tbody>
         @foreach (var e in Model)
         {
             <tr class="@(e.IsBrief ? "brief" : "")">
@@ -10,10 +13,11 @@
                 <td class="num">@Fmt.Duration(e.Duration)@(e.Ongoing ? "+" : "")</td>
                 <td class="num">@Fmt.Temp(e.PeakC)</td>
                 <td>
-                    @(e.IsBrief ? "Brief (door opening?)" : "")
-                    @(e.IncludesGap ? "Includes missing data" : "")
+                    @if (e.IsBrief) { <span class="tag">Brief (door opening?)</span> }
+                    @if (e.IncludesGap) { <span class="tag warn">Includes missing data</span> }
                 </td>
             </tr>
         }
+        </tbody>
     </table>
 </div>

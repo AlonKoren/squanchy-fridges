@@ -28,7 +28,7 @@
     @foreach (var u in Model.Results)
     {
         var errors = u.Issues.Count(i => i.Severity == IssueSeverity.Error);
-        <div class="panel @(errors > 0 && u.Imported == 0 ? "status-alarm" : u.Issues.Count > 0 ? "status-warning" : "")">
+        <div class="panel @(errors > 0 && u.Imported == 0 ? "status-alarm" : u.Issues.Count > 0 ? "status-warning" : "status-ok")">
             <strong>@u.FileName</strong> @(u.LoggerId is null ? "" : $"({u.LoggerId})")
             <div class="muted">
                 @u.Imported imported

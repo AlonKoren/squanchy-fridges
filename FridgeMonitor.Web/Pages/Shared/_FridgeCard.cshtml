@@ -1,16 +1,20 @@
 @model FridgeReport
 @{
     var brief = Model.Excursions.Count(e => e.IsBrief);
+    var css = StatusUi.Css(Model.Status);
 }
-<a class="card status-@StatusUi.Css(Model.Status)" asp-page="/Fridge" asp-route-branch="@Model.Fridge.Branch" asp-route-fridge="@Model.Fridge.Fridge">
+<a class="card status-@css" asp-page="/Fridge" asp-route-branch="@Model.Fridge.Branch" asp-route-fridge="@Model.Fridge.Fridge">
     <div class="card-head">
-        <span class="muted">@Model.Fridge.Branch</span>
-        <span class="badge status-@StatusUi.Css(Model.Status)">@StatusUi.Label(Model.Status)</span>
+        <span class="card-branch">@Model.Fridge.Branch</span>
+        <span class="badge status-@css">@StatusUi.Icon(Model.Status) @StatusUi.Label(Model.Status)</span>
     </div>
     <div class="card-title">@Model.Fridge.Fridge</div>
     @if (Model.LastValid is { } last)
     {
-        <div><span class="card-temp">@Fmt.Temp(last.TempC!.Value)</span> <span class="muted">at @Fmt.Time(last.Time)</span></div>
+        <div class="card-reading">
+            <span class="card-temp">@Fmt.Temp(last.TempC!.Value)</span>
+            <span class="muted">@Fmt.Time(last.Time)</span>
+        </div>
     }
     @if (Model.Reasons.Count > 0)
     {
@@ -23,6 +27,6 @@
     }
     @if (brief > 0)
     {
-        <div class="muted">@brief brief spike@(brief == 1 ? "" : "s") above 5°C (door opening?), not counted as a problem</div>
+        <div class="card-note">@brief brief spike@(brief == 1 ? "" : "s") above 5°C (door opening?), not counted as a problem</div>
     }
 </a>

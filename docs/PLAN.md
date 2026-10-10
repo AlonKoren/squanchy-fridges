@@ -67,9 +67,11 @@ Each row of the sample hides a problem. Decision for each:
 ## Decisions: UI
 
 - Razor Pages, server-rendered, no JavaScript framework. Fast on a phone, nothing to build.
-- Dropped the template's Bootstrap/jQuery. A ~100-line mobile-first stylesheet: one column of cards on a phone, 2–3 on wider screens.
+- Dropped the template's Bootstrap/jQuery. One hand-written mobile-first stylesheet: one column of cards on a phone, 2–3 on wider screens.
+- Visual design from the `ui-ux-pro-max` skill (vendored in `.claude/skills/`, MIT, upstream commit 50d8a7d): ran `--design-system` for "operations monitoring dashboard food safety mobile" (dense, minimal, low motion). Adopted: Swiss/minimal style, slate palette, status green/amber/red, its checklist (4.5:1 contrast, visible keyboard focus, 44px touch targets, `prefers-reduced-motion`, SVG icons not emoji, colour never alone), and the chart text-summary fallback.
+- Rejected from the skill's output: its "Operations Landing" pattern (a marketing hero + trial CTA; this is an internal tool), dark as default (Summer reads it on a phone in daylight; dark follows the OS instead), Fira Code/Fira Sans from Google Fonts (needs internet, and a code font is wrong for a bakery manager; system fonts), GSAP scroll animations (a JS dependency for motion that adds nothing).
 - Chart is SVG drawn on the server (`TempChart`). No CDN or chart library, so it works offline. The line breaks at gaps and ERR instead of drawing across missing data; every reading above 5 gets a red dot, so brief spikes are visible but labelled.
-- Dashboard: problems first (Alarm, Check, No data), OK fridges collapsed below. Each card shows the current temperature, when it was read, and the reasons in plain words. Colour always comes with a text label.
+- Dashboard: count tiles, then problems first (Alarm, Check, No data), OK fridges collapsed below. Each card shows the current temperature, when it was read, and the reasons in plain words. Colour always comes with a text label.
 - "Warning" is labelled "Check" for Summer: it means "look at this", not "something broke".
 - Inspector report: pick one fridge or all, a date range, then print or export CSV. CSV has a BOM so Excel shows ° and Hebrew-safe UTF-8 correctly. Brief spikes are listed and labelled, not hidden: an inspector should see everything.
 - Empty dashboard offers "Load sample week" so a reviewer sees a working app in one click.
