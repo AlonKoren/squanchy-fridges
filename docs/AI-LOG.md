@@ -1,6 +1,7 @@
 # AI log
 
 Each time an AI tool suggests something wrong or I reject a suggestion: what, how I caught it, where the fix is.
+"Original plan" = the Claude chat plan in [initial-plan-chat.md](initial-plan-chat.md).
 
 | Date | What the AI suggested | Why it's wrong / how I caught it | Fix (commit / test) |
 |---|---|---|---|
