@@ -54,6 +54,16 @@ Each row of the sample hides a problem. Decision for each:
 - Trend uses Theil–Sen (median of pairwise slopes) over the last 3h, so a single door spike doesn't look like warming.
 - A single ERR (30-min step) isn't a gap; two in a row is. ERR readings themselves make the fridge orange.
 
+## Decisions: storage
+
+- SQLite file `FridgeMonitor.Web/fridges.db`, created on first run with `EnsureCreated()`. No migrations, so cloning and running needs no setup step. Real deployment would switch to migrations.
+- The DB stores readings and uploads only. The registry stays in `loggers.json`: small, versioned with the code, no editing UI yet.
+- Unique index on (LoggerId, Time). Re-uploading the same file (managers do email twice), or a file that overlaps Summer's old sheet, stores nothing new. The upload summary says how many were already stored.
+- If a re-upload has a different value for a stored reading, the stored value is kept and the upload gets a warning. First write wins, so an inspector-facing record never silently changes.
+- Every upload is recorded with its counts and issues, even when it imported nothing, so "why is this fridge empty?" has an answer.
+- A file is treated as Summer's combined sheet if it has a Logger column next to Time and Temp; otherwise it's a single logger export.
+- Analysis loads the last 7 days into memory. ~24k rows/week is nothing; years of data would need per-fridge queries or pre-computed excursions.
+
 ## Architecture
 
 - `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.

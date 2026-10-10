@@ -190,12 +190,17 @@ public static class LoggerFileParser
 /// </summary>
 public static class SheetParser
 {
+    /// <summary>True if the file has a Logger column next to Time and Temp, i.e. it's Summer's sheet, not a logger export.</summary>
+    public static bool LooksLikeSheet(string content) => Csv.FindHeader(Csv.Lines(content), IsHeader) is not null;
+
+    static bool IsHeader(string[] c) =>
+        Csv.Column(c, "logger") >= 0 && Csv.Column(c, "time", "date") >= 0 && Csv.Column(c, "temp") >= 0;
+
     public static ImportResult Parse(string content, LoggerRegistry registry)
     {
         var result = new ImportResult();
         var lines = Csv.Lines(content);
-        var header = Csv.FindHeader(lines, c =>
-            Csv.Column(c, "logger") >= 0 && Csv.Column(c, "time", "date") >= 0 && Csv.Column(c, "temp") >= 0);
+        var header = Csv.FindHeader(lines, IsHeader);
         if (header is null)
         {
             result.Error("Couldn't find a header row with Logger, Time and Temp columns.");
