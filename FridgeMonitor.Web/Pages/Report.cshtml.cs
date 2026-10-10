@@ -29,14 +29,15 @@ public class ReportModel(FleetService fleet, LoggerRegistry registry) : PageMode
     {
         await LoadAsync();
         var inv = CultureInfo.InvariantCulture;
-        var csv = new StringBuilder("Branch,Fridge,Start,End,DurationMinutes,PeakC,Readings,Type,StillAbove,IncludesMissingData\r\n");
+        var csv = new StringBuilder("Branch,Fridge,Start,End,DurationMinutes,PeakC,Readings,Type,StillAbove,IncludesMissingData,StartedBeforePeriod,ContinuedAfterPeriod\r\n");
         foreach (var report in Reports)
             foreach (var e in report.Excursions)
                 csv.AppendJoin(',',
                         Escape(report.Fridge.Branch), Escape(report.Fridge.Fridge),
                         e.Start.ToString("yyyy-MM-dd HH:mm", inv), e.End.ToString("yyyy-MM-dd HH:mm", inv),
                         ((int)e.Duration.TotalMinutes).ToString(inv), e.PeakC.ToString("0.0", inv), e.ReadingCount.ToString(inv),
-                        e.IsBrief ? "Brief (door opening?)" : "Excursion", e.Ongoing ? "yes" : "no", e.IncludesGap ? "yes" : "no")
+                        e.IsBrief ? "Brief (door opening?)" : "Excursion", e.Ongoing ? "yes" : "no", e.IncludesGap ? "yes" : "no",
+                        e.StartedBeforePeriod ? "yes" : "no", e.ContinuedAfterPeriod ? "yes" : "no")
                    .Append("\r\n");
 
         // BOM so Excel opens it as UTF-8 (branch names, °).

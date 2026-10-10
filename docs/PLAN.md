@@ -54,6 +54,7 @@ Each row of the sample hides a problem. Decision for each:
 - Status is the worst thing that happened in the period, not just right now. Summer reviews weekly; a fridge that was above 5 for 30h on Monday must not show green on Sunday. The reason text says "now" vs "was".
 - Trend uses Theil–Sen (median of pairwise slopes) over the last 3h, so a single door spike doesn't look like warming.
 - A single ERR (30-min step) isn't a gap; two in a row is. ERR readings themselves make the fridge orange.
+- Reports for a date range load 7 days of readings either side as context. An excursion crossing the edge keeps its real start and end and is tagged "started before / continued after this period"; the total counts only the part inside the dates. Gaps, ERR counts and the chart stay inside the dates.
 
 ## Decisions: storage
 

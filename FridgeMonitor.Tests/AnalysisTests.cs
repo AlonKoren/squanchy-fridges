@@ -117,6 +117,55 @@ public class AnalysisTests
         Assert.Contains(report.Reasons, r => r.Text.StartsWith("No readings since"));
     }
 
+    // Mon 00:00 – Tue 23:45 every 15 min; above 5°C from Mon 06:15 until back under at Tue 16:00 (like Rishon).
+    static List<Reading> TwoDaysWithLongExcursion() =>
+        Series(Mon, Enumerable.Range(0, 192).Select(i => (double?)(i >= 25 && i < 160 ? 7.0 : 3.5)).ToArray());
+
+    static readonly Period Monday = new(Mon, Mon.AddDays(1).AddSeconds(-1));
+    static readonly Period Tuesday = new(Mon.AddDays(1), Mon.AddDays(2).AddSeconds(-1));
+
+    [Fact]
+    public void Report_for_a_day_shows_the_real_end_not_still_above()
+    {
+        var report = FridgeAnalyzer.Analyze(Fridge, TwoDaysWithLongExcursion(), Monday.End, Options, period: Monday);
+
+        var e = Assert.Single(report.Excursions);
+        Assert.False(e.Ongoing);
+        Assert.True(e.ContinuedAfterPeriod);
+        Assert.Equal(Mon.AddDays(1).AddHours(16), e.End);
+        Assert.Equal(FridgeStatus.Alarm, report.Status);
+        Assert.DoesNotContain(report.Reasons, r => r.Text.Contains("now"));
+    }
+
+    [Fact]
+    public void Excursion_that_started_before_the_period_keeps_its_real_start()
+    {
+        var report = FridgeAnalyzer.Analyze(Fridge, TwoDaysWithLongExcursion(), Tuesday.End, Options, period: Tuesday);
+
+        var e = Assert.Single(report.Excursions);
+        Assert.True(e.StartedBeforePeriod);
+        Assert.Equal(At(6, 15), e.Start);
+    }
+
+    [Fact]
+    public void Excursion_entirely_outside_the_period_is_left_out()
+    {
+        var evening = new Period(Mon.AddDays(1).AddHours(18), Tuesday.End);
+        Assert.Empty(FridgeAnalyzer.Analyze(Fridge, TwoDaysWithLongExcursion(), evening.End, Options, period: evening).Excursions);
+    }
+
+    [Fact]
+    public void Gaps_and_errors_outside_the_period_are_not_reported()
+    {
+        var readings = TwoDaysWithLongExcursion()
+            .Where(r => r.Time < At(2, 0) || r.Time >= At(5, 0))                     // 3h gap on Monday night
+            .Select(r => r.Time == At(10, 0) ? r with { TempC = null } : r)          // ERR on Monday
+            .ToList();
+        var report = FridgeAnalyzer.Analyze(Fridge, readings, Tuesday.End, Options, period: Tuesday);
+        Assert.Empty(report.Gaps);
+        Assert.Equal(0, report.ErrorReadings);
+    }
+
     [Fact]
     public void Fridge_without_readings_has_no_data()
     {

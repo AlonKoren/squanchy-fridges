@@ -9,12 +9,14 @@
         {
             <tr class="@(e.IsBrief ? "brief" : "")">
                 <td>@Fmt.Time(e.Start)</td>
-                <td>@(e.Ongoing ? "still above" : Fmt.Time(e.End))</td>
+                <td>@(e.Ongoing ? $"still above at {Fmt.Time(e.End)}" : Fmt.Time(e.End))</td>
                 <td class="num">@Fmt.Duration(e.Duration)@(e.Ongoing ? "+" : "")</td>
                 <td class="num">@Fmt.Temp(e.PeakC)</td>
                 <td>
                     @if (e.IsBrief) { <span class="tag">Brief (door opening?)</span> }
                     @if (e.IncludesGap) { <span class="tag warn">Includes missing data</span> }
+                    @if (e.StartedBeforePeriod) { <span class="tag">Started before this period</span> }
+                    @if (e.ContinuedAfterPeriod) { <span class="tag">Continued after this period</span> }
                 </td>
             </tr>
         }

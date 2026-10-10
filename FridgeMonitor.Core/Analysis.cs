@@ -27,9 +27,16 @@ public sealed record Gap(DateTime From, DateTime To)
 /// </summary>
 public sealed record Excursion(
     DateTime Start, DateTime End, double PeakC, int ReadingCount,
-    bool Ongoing, bool IncludesGap, bool IsBrief)
+    bool Ongoing, bool IncludesGap, bool IsBrief,
+    bool StartedBeforePeriod = false, bool ContinuedAfterPeriod = false)
 {
     public TimeSpan Duration => End - Start;
+}
+
+/// <summary>The time range being reported on, both ends inclusive.</summary>
+public sealed record Period(DateTime Start, DateTime End)
+{
+    public bool Contains(DateTime t) => t >= Start && t <= End;
 }
 
 // Declared worst first, so sorting by status puts problems at the top.
@@ -57,7 +64,8 @@ public static class FleetAnalyzer
     /// Groups readings by the fridge their logger was in at the time and analyses every registered fridge.
     /// "Now" defaults to the latest reading, not the wall clock: files arrive weekly.
     /// </summary>
-    public static FleetReport Analyze(IEnumerable<Reading> readings, LoggerRegistry registry, AnalysisOptions options, DateTime? asOf = null)
+    public static FleetReport Analyze(IEnumerable<Reading> readings, LoggerRegistry registry, AnalysisOptions options,
+                                      DateTime? asOf = null, Period? period = null)
     {
         var list = readings.ToList();
         var now = asOf ?? (list.Count > 0 ? list.Max(r => r.Time) : DateTime.Now);
@@ -67,13 +75,17 @@ public static class FleetAnalyzer
         foreach (var r in list)
         {
             var fridge = registry.FridgeAt(r.LoggerId, r.Time);
-            if (fridge is null) { unassigned.Add(r); continue; }
+            if (fridge is null)
+            {
+                if (period is null || period.Contains(r.Time)) unassigned.Add(r);
+                continue;
+            }
             if (!byFridge.TryGetValue(fridge, out var bucket)) byFridge[fridge] = bucket = new();
             bucket.Add(r);
         }
 
         var reports = registry.AllFridges
-            .Select(f => FridgeAnalyzer.Analyze(f, byFridge.GetValueOrDefault(f) ?? [], now, options, registry.UnmonitoredSince(f, now)))
+            .Select(f => FridgeAnalyzer.Analyze(f, byFridge.GetValueOrDefault(f) ?? [], now, options, registry.UnmonitoredSince(f, now), period))
             .OrderBy(r => r.Status).ThenBy(r => r.Fridge.Branch).ThenBy(r => r.Fridge.Fridge)
             .ToList();
         return new FleetReport(now, reports, unassigned);
@@ -84,10 +96,15 @@ public static class FridgeAnalyzer
 {
     static readonly TimeSpan DefaultInterval = TimeSpan.FromMinutes(15);
 
+    /// <param name="period">
+    /// If set, report on this period only. Readings outside it can be passed in as context, so an excursion
+    /// crossing the edge keeps its real start and end instead of being cut off at the edge.
+    /// </param>
     public static FridgeReport Analyze(FridgeKey fridge, IEnumerable<Reading> readings, DateTime asOf,
-                                       AnalysisOptions o, DateTime? unmonitoredSince = null)
+                                       AnalysisOptions o, DateTime? unmonitoredSince = null, Period? period = null)
     {
-        var all = readings.OrderBy(r => r.Time).ToList();
+        var everything = readings.OrderBy(r => r.Time).ToList();
+        var all = period is null ? everything : everything.Where(r => period.Contains(r.Time)).ToList();
         var valid = all.Where(r => !r.IsError).ToList();
         int errors = all.Count - valid.Count;
         var reasons = new List<StatusReason>();
@@ -104,19 +121,22 @@ public static class FridgeAnalyzer
         }
 
         var gapThreshold = ExpectedInterval(valid) * o.GapFactor;
-        var excursions = FindExcursions(valid, o, gapThreshold);
+        var excursions = period is null
+            ? FindExcursions(valid, o, gapThreshold)
+            : ClipToPeriod(FindExcursions(everything.Where(r => !r.IsError).ToList(), o, gapThreshold), period);
         var gaps = FindGaps(valid, gapThreshold);
         var trend = TrendCPerHour(valid, o.TrendWindowHours);
         var last = valid[^1];
         var minExcursion = TimeSpan.FromMinutes(o.MinExcursionMinutes);
 
-        var current = excursions.LastOrDefault(e => e.Ongoing);
+        // "Now" only if it's still going at the end of the data and the period reaches that far.
+        var current = excursions.LastOrDefault(e => e.Ongoing && !e.ContinuedAfterPeriod);
         if (current is not null)
             reasons.Add(current.Duration >= minExcursion
                 ? new(FridgeStatus.Alarm, $"Above {limit} now, for {Fmt.Duration(current.Duration)} (peak {Fmt.Temp(current.PeakC)})")
                 : new(FridgeStatus.Warning, $"Above {limit} at the last reading ({Fmt.Temp(last.TempC!.Value)})"));
 
-        var past = excursions.Where(e => !e.Ongoing && !e.IsBrief).ToList();
+        var past = excursions.Where(e => !ReferenceEquals(e, current) && !e.IsBrief).ToList();
         if (past.Count > 0)
         {
             var longest = past.MaxBy(e => e.Duration)!;
@@ -145,6 +165,13 @@ public static class FridgeAnalyzer
 
         return new FridgeReport(fridge, reasons, last, excursions, gaps, errors, trend);
     }
+
+    /// <summary>Excursions that overlap the period, flagged where they cross its edges.</summary>
+    static List<Excursion> ClipToPeriod(List<Excursion> excursions, Period period) =>
+        excursions
+            .Where(e => e.End > period.Start && e.Start <= period.End)
+            .Select(e => e with { StartedBeforePeriod = e.Start < period.Start, ContinuedAfterPeriod = e.End > period.End })
+            .ToList();
 
     /// <summary>The logger's usual interval: median step between readings (robust to the odd gap).</summary>
     public static TimeSpan ExpectedInterval(IReadOnlyList<Reading> sorted)

@@ -98,6 +98,26 @@ public sealed class StorageTests : IDisposable
     }
 
     [Fact]
+    public async Task Inspector_report_for_one_day_shows_when_rishon_actually_recovered()
+    {
+        var sample = Path.Combine(RepoRoot(), "sample-data");
+        var fullRegistry = LoggerRegistry.FromJson(File.ReadAllText(Path.Combine(sample, "loggers.json")));
+        await new ImportService(db, fullRegistry).ImportAsync("TL-0388_2026-09-14.csv",
+            File.ReadAllText(Path.Combine(sample, "logger-files", "TL-0388_2026-09-14.csv")));
+        var service = new FleetService(db, fullRegistry, Microsoft.Extensions.Options.Options.Create(new AnalysisOptions()));
+
+        var (report, readings) = await service.GetFridgeAsync(
+            new FridgeKey("Rishon LeZion", "Cream cakes"), Mon, Mon.AddDays(1).AddSeconds(-1));
+
+        var e = report.Excursions.Single(x => !x.IsBrief);
+        Assert.Equal(At(6, 15), e.Start);
+        Assert.False(e.Ongoing);                                  // was "still above" before the fix
+        Assert.True(e.ContinuedAfterPeriod);
+        Assert.Equal(new DateTime(2026, 9, 15), e.End.Date);     // recovered on Tuesday
+        Assert.All(readings, r => Assert.Equal(Mon, r.Time.Date)); // chart still shows only Monday
+    }
+
+    [Fact]
     public async Task Fridge_report_for_a_date_range_follows_the_moved_logger()
     {
         await import.ImportAsync("TL-0417_2026-09-14.csv",
