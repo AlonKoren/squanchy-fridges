@@ -86,10 +86,10 @@ public sealed class LoggerRegistry
                 if (string.IsNullOrWhiteSpace(a.Branch) || string.IsNullOrWhiteSpace(a.Fridge))
                     problems.Add($"{id}: an assignment is missing its branch or fridge.");
                 if (a.To <= a.From)
-                    problems.Add($"{id}: assignment to {a.Key} ends ({a.To:yyyy-MM-dd HH:mm}) before it starts ({a.From:yyyy-MM-dd HH:mm}).");
+                    problems.Add($"{id}: assignment to {a.Key} ends ({When(a.To)}) before it starts ({When(a.From)}).");
             }
             foreach (var (a, b) in OverlappingPairs(l.Assignments))
-                problems.Add($"{id}: in {a.Key} and {b.Key} at the same time (from {b.From:yyyy-MM-dd HH:mm}).");
+                problems.Add($"{id}: in {a.Key} and {b.Key} at the same time (from {When(b.From)}).");
         }
 
         // Two loggers in one fridge at once would merge their readings into one confusing line.
@@ -102,11 +102,14 @@ public sealed class LoggerRegistry
             for (int i = 0; i < list.Count; i++)
                 for (int j = i + 1; j < list.Count; j++)
                     if (list[i].Logger != list[j].Logger && Overlap(list[i].Assignment, list[j].Assignment))
-                        problems.Add($"{fridge.Key}: {list[i].Logger} and {list[j].Logger} assigned at the same time (from {list[j].Assignment.From:yyyy-MM-dd HH:mm}).");
+                        problems.Add($"{fridge.Key}: {list[i].Logger} and {list[j].Logger} assigned at the same time (from {When(list[j].Assignment.From)}).");
         }
 
         return problems;
     }
+
+    // Invariant like every other date the app shows: a server culture with another calendar can't change it.
+    static string When(DateTime? t) => t?.ToString("yyyy-MM-dd HH:mm", System.Globalization.CultureInfo.InvariantCulture) ?? "";
 
     static IEnumerable<(Assignment, Assignment)> OverlappingPairs(IReadOnlyList<Assignment> assignments)
     {

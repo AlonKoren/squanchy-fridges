@@ -76,6 +76,24 @@ public class RegistryTests
     }
 
     [Fact]
+    public void Problem_dates_are_the_same_whatever_the_server_culture()
+    {
+        var original = System.Globalization.CultureInfo.CurrentCulture;
+        try
+        {
+            // ar-SA uses the Umm al-Qura calendar by default: culture formatting would print a 1448 date.
+            System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("ar-SA");
+            var message = Problems(Logger("TL-0417",
+                Assign("Walk-in", "2024-01-01T00:00:00", "2026-09-17T00:00:00") + "," + Assign("Display 2", "2026-09-16T10:30:00")));
+            Assert.Contains("from 2026-09-16 10:30", message);
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = original;
+        }
+    }
+
+    [Fact]
     public void A_move_with_a_gap_in_between_is_valid()
     {
         LoggerRegistry.FromJson($"[{Logger("TL-0417",

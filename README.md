@@ -25,7 +25,7 @@ The first run restores NuGet packages and creates the database (`FridgeMonitor.W
 dotnet test
 ```
 
-63 tests: every row of Summer's sample table, the parser and analysis rules, storage against in-memory SQLite,
+64 tests: every row of Summer's sample table, the parser and analysis rules, storage against in-memory SQLite,
 and an end-to-end run over the whole sample week.
 
 ## What's in it
