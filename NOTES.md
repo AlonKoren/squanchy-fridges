@@ -30,6 +30,7 @@ Full list with reasoning in [docs/PLAN.md](docs/PLAN.md). The main ones:
 - When exactly was TL-0417 moved, and does the Tel Aviv Walk-in have a logger now? (The move time in the registry is made up.)
 - Is the Haifa logger definitely °F, and is it being replaced?
 - You mention ~3,000 rows a week, but 12 branches × ~3 fridges × every 15 minutes is ~24,000. What interval do the loggers record at, or which rows do you paste?
+- Will you keep using the combined sheet? The import reads each row with that logger's own date format, which matches your sample. If Excel re-saves the sheet it may rewrite every date in one local format (e.g. `14/09/2026 06:00`), and those rows would be rejected with a clear error, not misread. If you'll keep using it, I'd add a date-format setting for the sheet.
 - Are logger clocks in Israel time? When DST ends at the end of October one hour repeats, and the app would treat the second 01:30 as a duplicate.
 - Who should be told when a fridge goes red, and how (WhatsApp, SMS, email)? At night too?
 - What does the inspector want: a printout, a file? How far back, and how long must records be kept?
