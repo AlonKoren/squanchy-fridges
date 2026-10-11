@@ -63,6 +63,7 @@ Each row of the sample hides a problem. Decision for each:
 - Unique index on (LoggerId, Time). Re-uploading the same file (managers do email twice), or a file that overlaps Summer's old sheet, stores nothing new. The upload summary says how many were already stored.
 - If a re-upload has a different value for a stored reading, the stored value is kept and the upload gets a warning. First write wins, so an inspector-facing record never silently changes.
 - Every upload is recorded with its counts and issues, even when it imported nothing, so "why is this fridge empty?" has an answer.
+- Two uploads of the same readings at the same moment (a double tap on a slow phone) both pass the "already stored?" check; the unique index rejects the second. That import is thrown away and run once more, so it reports the readings as already stored instead of showing an error page.
 - A file is treated as Summer's combined sheet if it has a Logger column next to Time and Temp; otherwise it's a single logger export.
 - Analysis loads the last 7 days into memory. ~24k rows/week is nothing; years of data would need per-fridge queries or pre-computed excursions.
 

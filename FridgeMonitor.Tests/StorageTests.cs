@@ -45,6 +45,42 @@ public sealed class StorageTests : IDisposable
     }
 
     [Fact]
+    public async Task Same_file_uploaded_twice_at_once_does_not_fail()
+    {
+        // Make the race deterministic: just before this import saves, another one saves the same readings.
+        var rival = new FridgeDb(new DbContextOptionsBuilder<FridgeDb>().UseSqlite(connection).Options);
+        var racing = new FridgeDb(new DbContextOptionsBuilder<FridgeDb>().UseSqlite(connection)
+            .AddInterceptors(new BeforeFirstSave(() => new ImportService(rival, registry).ImportAsync("TL-0512.csv", JerusalemFile)))
+            .Options);
+
+        var upload = await new ImportService(racing, registry).ImportAsync("TL-0512.csv", JerusalemFile);
+
+        Assert.Equal(0, upload.Imported);
+        Assert.Equal(3, upload.AlreadyStored);
+        Assert.Equal(3, await db.Readings.CountAsync());
+        Assert.Equal(2, await db.Uploads.CountAsync());   // the rival's and the retried one, not the failed attempt
+    }
+
+    /// <summary>Runs an action once, right before the first SaveChanges on the context it's attached to.</summary>
+    sealed class BeforeFirstSave(Func<Task> action) : Microsoft.EntityFrameworkCore.Diagnostics.SaveChangesInterceptor
+    {
+        bool done;
+
+        public override async ValueTask<Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int>> SavingChangesAsync(
+            Microsoft.EntityFrameworkCore.Diagnostics.DbContextEventData eventData,
+            Microsoft.EntityFrameworkCore.Diagnostics.InterceptionResult<int> result,
+            CancellationToken cancellationToken = default)
+        {
+            if (!done)
+            {
+                done = true;
+                await action();
+            }
+            return result;
+        }
+    }
+
+    [Fact]
     public async Task Summer_sheet_is_detected_and_overlaps_with_logger_files()
     {
         var sheet = await import.ImportAsync("summer.csv",

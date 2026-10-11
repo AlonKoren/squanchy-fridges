@@ -1,5 +1,6 @@
 using FridgeMonitor.Core;
 using FridgeMonitor.Web.Data;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace FridgeMonitor.Web.Services;
@@ -11,6 +12,22 @@ public sealed class ImportService(FridgeDb db, LoggerRegistry registry)
     /// readings not already in the database. Never throws on bad content: problems go in Upload.Issues.
     /// </summary>
     public async Task<Upload> ImportAsync(string fileName, string content)
+    {
+        try
+        {
+            return await ImportOnceAsync(fileName, content);
+        }
+        catch (DbUpdateException ex) when (ex.InnerException is SqliteException { SqliteErrorCode: 19 })
+        {
+            // Another upload of the same readings saved between our check and our save (a double tap on
+            // a slow phone). The unique index kept the data clean; throw away this attempt and run it again,
+            // so the second import sees those readings as already stored instead of showing an error page.
+            db.ChangeTracker.Clear();
+            return await ImportOnceAsync(fileName, content);
+        }
+    }
+
+    async Task<Upload> ImportOnceAsync(string fileName, string content)
     {
         var result = SheetParser.LooksLikeSheet(content)
             ? SheetParser.Parse(content, registry)
