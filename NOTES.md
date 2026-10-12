@@ -2,11 +2,11 @@
 
 ## Time spent
 
-About **5¾ hours** in total.
+About **6 hours** in total.
 
 | When | Time | What |
 |---|---|---|
-| Before the build | ~30 min | Read the assignment and Summer's email, then planned in a Claude chat: listed the traps in her sample and a decision for each (now in [docs/PLAN.md](docs/PLAN.md)). |
+| Before the build | ~45 min | Read the assignment and Summer's email, then planned in a Claude chat: listed the traps in her sample and a decision for each (now in [docs/PLAN.md](docs/PLAN.md)). |
 | Sat 10 Oct, 17:48–19:40 | ~2 h | First working version in Claude Code: sample data, parser, analysis, storage, UI, README, NOTES. Then registry validation, the inspector-report edge fix, and a UI redesign I reverted. |
 | Mon 12 Oct, ~02:00–02:30 | ~30 min | Code review and fixes: double upload, culture in registry errors. |
 | Mon 12 Oct, ~03:50–04:25 | ~30 min | Second review: fridge-page total fix, docs restructured. |
