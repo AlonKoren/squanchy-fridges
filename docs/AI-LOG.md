@@ -15,7 +15,7 @@ Every time an AI tool suggested something wrong, or I rejected a suggestion: wha
 | 5 | 10 Oct | Parts of the ui-ux-pro-max design rejected | Checking it against Summer's context |
 | 6 | 10 Oct | Phone screenshot looked cut off | Re-shooting in a 390px frame |
 | 7 | 10 Oct | Inspector report cut excursions at the edge of the dates | Asking for improvement ideas |
-| 8 | 10 Oct | Second UI redesign reverted | My own review of the result |
+| 8 | 10 Oct | Second UI redesign reverted: it looked worse | My own review of the result |
 | 9 | 12 Oct | Double upload could show an error page | Code review |
 | 10 | 12 Oct | Registry error dates used the server culture | Code review |
 | 11 | 12 Oct | Fridge page total counted time outside the chosen dates | Second code review |
@@ -71,6 +71,7 @@ Every time an AI tool suggested something wrong, or I rejected a suggestion: wha
 ### 8. Second UI redesign
 
 - **Suggested (Claude Code):** redesign the dashboard as a branch-by-branch "ops sheet", to look less generated.
+- **Problem:** when I looked at the result, it simply looked worse than the design it replaced. Looking "less generated" isn't worth a worse page for Summer.
 - **Decision:** I didn't keep it and went back to the previous design.
 - **Fix:** reset to `9833a6c`, so it isn't in the history.
 
