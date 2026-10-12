@@ -2,7 +2,7 @@
 
 ## Time spent
 
-About **6 hours** in total.
+About **7 hours** in total.
 
 | When | Time | What |
 |---|---|---|
@@ -10,7 +10,7 @@ About **6 hours** in total.
 | Sat 10 Oct, 17:48–19:40 | ~2 h | First working version in Claude Code: sample data, parser, analysis, storage, UI, README, NOTES. Then registry validation, the inspector-report edge fix, and a UI redesign I reverted. |
 | Mon 12 Oct, ~02:00–02:30 | ~30 min | Code review and fixes: double upload, culture in registry errors. |
 | Mon 12 Oct, ~03:50–04:25 | ~30 min | Second review: fridge-page total fix, docs restructured. |
-| Mon 12 Oct, ~09:00–09:30 | ~30 min | Final pass on the docs. |
+| Mon 12 Oct, ~09:00–10:35 | ~1½ h | Final pass: docs, README (NOTES link, screenshot, .NET version), a full check from a fresh clone, publishing. |
 | Between sessions | ~1¾ h | Checking: reading the code, clicking through the app, testing uploads and the inspector report. |
 
 Most of the time went into finding the traps in Summer's data and deciding what to do about each one. With an AI tool, writing the code was the fast part.
