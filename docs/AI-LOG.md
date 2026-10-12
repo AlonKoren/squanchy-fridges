@@ -2,7 +2,7 @@
 
 Every time an AI tool suggested something wrong, or I rejected a suggestion: what it was, how it was caught, and where the fix is.
 
-"Original plan" means the Claude chat plan in [initial-plan-chat.md](initial-plan-chat.md), written before any code.
+"Original plan" means the plan I made in a Claude chat before writing any code. The traps and decisions from it are in [PLAN.md](PLAN.md).
 
 ## Summary
 

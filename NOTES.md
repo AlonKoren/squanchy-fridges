@@ -4,7 +4,7 @@
 
 | When | What |
 |---|---|
-| Before the build | Planning in a Claude chat: read the brief and listed the traps in Summer's sample ([docs/initial-plan-chat.md](docs/initial-plan-chat.md)). |
+| Before the build | Planning in a Claude chat: read the brief and listed the traps in Summer's sample (now in [docs/PLAN.md](docs/PLAN.md)). |
 | Sat 10 Oct, 17:48–19:40 | First working version in Claude Code: sample data, parser, analysis, storage, UI, README, NOTES. Then registry validation, the inspector-report edge fix, and a UI redesign I reverted. |
 | Mon 12 Oct, ~02:00–02:30 | Code review and fixes: double upload, culture in registry errors. |
 | Mon 12 Oct, ~04:00 | Second review: fridge-page total fix, docs cleaned up. |
