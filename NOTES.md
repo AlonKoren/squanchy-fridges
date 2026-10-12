@@ -103,6 +103,7 @@ The full list, with reasoning, is in [docs/PLAN.md](docs/PLAN.md). The main ones
 - "Brief = exactly one reading" only works for a 15-minute interval. Changed to a duration.
 - A test expected 17 normal fridges when there are 18. The moved logger counts for two fridges, and the failing test caught it.
 - Parts of the `ui-ux-pro-max` design were rejected (marketing landing pattern, dark default, Google Fonts, GSAP), because they don't fit an offline internal tool used on a phone in daylight.
+- The first inspector report loaded only the readings inside the chosen dates, so an excursion crossing the edge was cut: Rishon on Monday showed "still above" although it recovered on Tuesday. I found it when reviewing where the inspector question could be answered wrong. Now it loads context either side.
 - Three bugs in AI-written code, found in code reviews I asked for: a double upload could show an error page; registry error dates used the server culture; the fridge-page total counted time outside the chosen dates.
 
 ## Anything else
