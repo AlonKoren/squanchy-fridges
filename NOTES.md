@@ -61,4 +61,4 @@ With one more hour: a page to add and move loggers (with dates), because editing
 
 - Traps first, then code: [docs/PLAN.md](docs/PLAN.md) starts with every problem hidden in Summer's 16 rows and the decision for each, before any code was written.
 - Sample data is invented around Summer's 16 rows by a seeded generator (`tools/SampleDataGen`), so it's reproducible. [sample-data/README.md](sample-data/README.md) says which file shows which problem, and an end-to-end test checks every one.
-- The history is as worked, with one exception: steps 3–5 (model, parser, analysis) were first committed together and then split into three commits, each of which builds and passes its tests.
+- The history is as worked, with two exceptions: steps 3–5 (model, parser, analysis) were first committed together and then split into three commits, each of which builds and passes its tests; and a second UI redesign (dashboard as a branch-by-branch ops sheet) was committed, then reverted with a reset, so it isn't in the history. It's in [docs/AI-LOG.md](docs/AI-LOG.md).

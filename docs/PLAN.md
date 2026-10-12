@@ -16,7 +16,7 @@ Each row of the sample hides a problem. Decision for each:
 | Haifa `ERR` | Sensor error | Keep as an invalid reading (evidence). Never 0. Counts as missing data. |
 | Jerusalem 06:15 twice | Duplicate row | Deduplicate on (logger, time). |
 | Tel Aviv 05:45 after 06:30 | Out of order | Always sort by time before analysis. |
-| Tel Aviv 9.4 once, then 4.3 | Door opened for a delivery | Single reading above limit = "brief", not an alarm. Still listed in the inspector report, labelled. |
+| Tel Aviv 9.4 once, then 4.3 | Door opened for a delivery | Back under within 30 min = "brief", not an alarm (by duration, not reading count). Still listed in the inspector report, labelled. |
 | Rishon 4.6 → 5.4 → 6.3 → 7.1 | Slow warming (the lost dairy) | Must go red. Also warn on a rising trend before it crosses 5°C. |
 | Jerusalem 06:15 → 08:30 | Gap in the data | Gap = step > 2× the normal interval. Show it. The file can't say why, so don't pretend. |
 | TL-0417 Walk-in → Display 2 on the 17th | Logger moved | Logger→fridge assignments have date ranges. A reading belongs to the fridge the logger was in at that time. |
@@ -65,7 +65,7 @@ Each row of the sample hides a problem. Decision for each:
 - Every upload is recorded with its counts and issues, even when it imported nothing, so "why is this fridge empty?" has an answer.
 - Two uploads of the same readings at the same moment (a double tap on a slow phone) both pass the "already stored?" check; the unique index rejects the second. That import is thrown away and run once more, so it reports the readings as already stored instead of showing an error page.
 - A file is treated as Summer's combined sheet if it has a Logger column next to Time and Temp; otherwise it's a single logger export.
-- Analysis loads the last 7 days into memory. ~24k rows/week is nothing; years of data would need per-fridge queries or pre-computed excursions.
+- Analysis loads the last 7 days into memory, plus 7 days before them as context. ~24k rows/week is nothing; years of data would need per-fridge queries or pre-computed excursions.
 
 ## Decisions: UI
 
