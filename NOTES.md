@@ -2,12 +2,18 @@
 
 ## Time spent
 
-| When | What |
-|---|---|
-| Before the build | Planning in a Claude chat: read the brief and listed the traps in Summer's sample (now in [docs/PLAN.md](docs/PLAN.md)). |
-| Sat 10 Oct, 17:48–19:40 | First working version in Claude Code: sample data, parser, analysis, storage, UI, README, NOTES. Then registry validation, the inspector-report edge fix, and a UI redesign I reverted. |
-| Mon 12 Oct, ~02:00–02:30 | Code review and fixes: double upload, culture in registry errors. |
-| Mon 12 Oct, ~04:00 | Second review: fridge-page total fix, docs cleaned up. |
+About **5¾ hours** in total.
+
+| When | Time | What |
+|---|---|---|
+| Before the build | ~30 min | Read the assignment and Summer's email, then planned in a Claude chat: listed the traps in her sample and a decision for each (now in [docs/PLAN.md](docs/PLAN.md)). |
+| Sat 10 Oct, 17:48–19:40 | ~2 h | First working version in Claude Code: sample data, parser, analysis, storage, UI, README, NOTES. Then registry validation, the inspector-report edge fix, and a UI redesign I reverted. |
+| Mon 12 Oct, ~02:00–02:30 | ~30 min | Code review and fixes: double upload, culture in registry errors. |
+| Mon 12 Oct, ~03:50–04:25 | ~30 min | Second review: fridge-page total fix, docs restructured. |
+| Mon 12 Oct, ~09:00–09:30 | ~30 min | Final pass on the docs. |
+| Between sessions | ~1¾ h | Checking: reading the code, clicking through the app, testing uploads and the inspector report. |
+
+Most of the time went into finding the traps in Summer's data and deciding what to do about each one. With an AI tool, writing the code was the fast part.
 
 ## Decisions Summer didn't ask for, and why
 
