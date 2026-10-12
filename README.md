@@ -5,6 +5,10 @@ what's wrong, since when, and the answer to the inspector's "when did this fridg
 
 No accounts, no paid services, no internet needed once packages are restored. Data lives in a local SQLite file.
 
+**Decisions, questions for Summer, what's not done and the AI story: [NOTES.md](NOTES.md).**
+
+<img src="docs/dashboard-phone.png" alt="Dashboard on a phone after loading the sample week: 3 alarms, 6 to check, 1 with no data, 18 OK, problem fridges first" width="300">
+
 ## Run it
 
 Requirements: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or newer (`dotnet --version`).
@@ -46,6 +50,7 @@ FridgeMonitor.Web/      Razor Pages UI, EF Core + SQLite storage
 FridgeMonitor.Tests/    xUnit tests
 tools/SampleDataGen/    generates sample-data/ (fixed seed, reproducible)
 sample-data/            loggers.json (registry), logger files, Summer's sheet
+NOTES.md                decisions, questions for Summer, what's left, AI story
 docs/PLAN.md            the traps in Summer's email and every decision made
 docs/AI-LOG.md          where AI tools got it wrong and how it was caught
 CLAUDE.md               instructions for the AI coding tool
