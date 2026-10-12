@@ -3,104 +3,136 @@
 ## Goal
 
 Summer uploads the weekly logger files and sees, on her phone, how every fridge is doing.
-She can answer the inspector: "when did this fridge go above 5°C, and for how long?"
+She can answer the inspector: "When did this fridge go above 5°C, and for how long?"
 
-## Traps in Summer's sample table
+## Contents
 
-Each row of the sample hides a problem. Decision for each:
+1. [Traps in Summer's sample](#1-traps-in-summers-sample)
+2. [Status rules](#2-status-rules)
+3. [Decisions](#3-decisions): sample data, logger registry, parser, analysis, storage, UI
+4. [Architecture](#4-architecture)
+5. [Order of work](#5-order-of-work)
 
-| What's in the data | What it really means | Decision |
+## 1. Traps in Summer's sample
+
+Every row of Summer's sample hides a problem. The decision for each one:
+
+| In the data | What it means | Decision |
 |---|---|---|
-| Haifa TL-0231 shows 38.3, 39.0 | Logger reports Fahrenheit (38.3°F ≈ 3.5°C) | Unit per logger in a registry. Never guess from the value. Warn if a value is implausible for its unit. |
-| Haifa uses `14/09/2026` | Different date format | Date format per logger, parsed with `TryParseExact` + invariant culture. No culture guessing. |
-| Haifa `ERR` | Sensor error | Keep as an invalid reading (evidence). Never 0. Counts as missing data. |
-| Jerusalem 06:15 twice | Duplicate row | Deduplicate on (logger, time). |
+| Haifa TL-0231 shows 38.3, 39.0 | The logger reports Fahrenheit (38.3°F ≈ 3.5°C) | Unit per logger, in a registry. Never guess from the value. Warn if a value is implausible for its unit. |
+| Haifa writes `14/09/2026` | A different date format | Date format per logger, read with `TryParseExact` and the invariant culture. No culture guessing. |
+| Haifa `ERR` | Sensor error | Keep it as an error reading (it's evidence), never 0. It counts as missing data. |
+| Jerusalem 06:15 twice | Duplicate row | Remove duplicates on (logger, time). |
 | Tel Aviv 05:45 after 06:30 | Out of order | Always sort by time before analysis. |
-| Tel Aviv 9.4 once, then 4.3 | Door opened for a delivery | Back under within 30 min = "brief", not an alarm (by duration, not reading count). Still listed in the inspector report, labelled. |
+| Tel Aviv 9.4 once, then 4.3 | Door opened for a delivery | Back under within 30 min = "brief", not an alarm (decided by duration, not reading count). Still listed in the inspector report, labelled. |
 | Rishon 4.6 → 5.4 → 6.3 → 7.1 | Slow warming (the lost dairy) | Must go red. Also warn on a rising trend before it crosses 5°C. |
-| Jerusalem 06:15 → 08:30 | Gap in the data | Gap = step > 2× the normal interval. Show it. The file can't say why, so don't pretend. |
-| TL-0417 Walk-in → Display 2 on the 17th | Logger moved | Logger→fridge assignments have date ranges. A reading belongs to the fridge the logger was in at that time. |
-| `tel aviv` vs `Tel Aviv` | Hand-typed names | Branches/fridges live in a registry. Normalize names on import of the legacy sheet. |
-| "Columns move around" | Inconsistent files | Find columns by header name, not position. Detect separator. |
-| "Files only have time and temp" | Summer types the metadata | Logger ID from filename (or header line); registry supplies branch/fridge. |
+| Jerusalem 06:15 → 08:30 | Gap in the data | Gap = a step longer than 2× the normal interval. Show it. The file can't say why, so don't pretend. |
+| TL-0417 Walk-in → Display 2 on the 17th | Logger moved | Logger-to-fridge assignments have date ranges. A reading belongs to the fridge the logger was in at that time. |
+| `tel aviv` vs `Tel Aviv` | Hand-typed names | Branches and fridges live in a registry. Normalize names when importing the old sheet. |
+| "Columns move around" | Files differ | Find columns by header name, not position. Detect the separator. |
+| "Files only have time and temp" | Summer types the rest by hand | Logger ID from the file name (or a header line). The registry supplies branch and fridge. |
 | "On my phone" | Mobile | Mobile-first UI. |
-| Inspector question | Excursion report | Per-fridge excursions (start, end, duration, peak), filter by date, export CSV. |
+| The inspector's question | Excursion report | Per-fridge excursions (start, end, duration, peak), filtered by date, exported as CSV. |
 
-## Decisions from building the sample data
+## 2. Status rules
 
-- Logger ID comes from the file name (`TL-0512_2026-09-14.csv`). The old Haifa model has no ID in the name, so fall back to its preamble line `Logger ID;TL-0231`.
-- When a logger moves, the registry has a hole between "unplugged" and "clipped in" (TL-0417: 10:00–10:30). Readings in that hole belong to no fridge. Report them as "unassigned", never count them against either fridge. Otherwise the 21°C readings while carrying it would show as an alarm.
-- After TL-0417 moved, the Tel Aviv Walk-in has no logger. The dashboard should say so, not quietly drop the fridge.
-- "Now" for status = the latest reading across all uploads, not the wall clock. Files arrive weekly, so wall-clock "now" would make everything look stale.
-- Summer says ~3000 rows a week. 12 branches × ~3 fridges × every 15 min is ~24,000. Either the interval is longer or she pastes only part. Question for Summer. Sample data uses 15 min, as in her sample.
+To confirm with Summer. All thresholds are settings in `appsettings.json`.
 
-## Decisions: logger registry
+| Colour | Status | When |
+|---|---|---|
+| Red | Alarm | Above 5°C for 30 min or more, now or earlier in the period. |
+| Orange | Check (Warning) | Warming faster than 0.5°C/h over the last 3h while under 5°C; one reading above 5 at the end; gaps; logger stopped; ERR readings; no logger in the fridge. |
+| Green | OK | Anything else. Brief spikes are shown but don't change the colour. |
+| Grey | No data | No readings in the period. |
 
-- Readings are stored per logger, not per fridge. The fridge is looked up from the registry by time when analysing, so fixing a wrong assignment later fixes the history too.
-- Assignment `from` is inclusive, `to` exclusive. A time covered by no assignment (logger in transit) belongs to no fridge.
-- `loggers.json` is validated at startup and the app refuses to run on a mistake, listing all of them: duplicate IDs, unusable date formats, no assignments, `to` before `from`, one logger in two fridges at once, two loggers in one fridge at once. A wrong move date would otherwise silently put readings in the wrong fridge.
+The fridge gets the worst status of all its reasons.
 
-## Decisions: parser
+## 3. Decisions
 
-- Dates: logger's configured format first, then only year-first ISO formats. A day-first/month-first guess never happens.
-- Unit comes only from the registry. If the file header names a unit that disagrees, or the median reading is above 15°C, the upload shows a warning. No silent auto-conversion.
-- Duplicate (logger, time) rows: keep the first. Same time with a different value → warning.
-- One bad row is reported with its line number; the rest of the file is still imported.
+### Sample data
 
-## Decisions: analysis
+- The logger ID comes from the file name (`TL-0512_2026-09-14.csv`). The old Haifa model has no ID in the name, so the parser falls back to its preamble line `Logger ID;TL-0231`.
+- When a logger moves, the registry has a hole between "unplugged" and "clipped in" (TL-0417: 10:00–10:30). Readings in that hole belong to no fridge. They're shown as "unassigned" and never count against either fridge. Otherwise the 21°C readings taken while carrying it would show as an alarm.
+- After TL-0417 moved, the Tel Aviv Walk-in has no logger. The dashboard says so instead of quietly dropping the fridge.
+- "Now" = the latest reading across all uploads, not the wall clock. Files arrive weekly, so wall-clock "now" would make everything look stale.
+- Summer says ~3,000 rows a week. 12 branches × ~3 fridges × every 15 min is ~24,000. Either the interval is longer or she pastes only part of it. This is a question for Summer. The sample data uses 15 minutes, as in her sample.
 
-- Excursion = run of readings strictly above 5.0°C. Duration = first reading above → first reading back under. If a gap falls inside, it's flagged "includes missing data".
-- Brief vs alarm is by duration (< 30 min), not reading count, so it still works if a logger reads every 5 minutes.
-- Status is the worst thing that happened in the period, not just right now. Summer reviews weekly; a fridge that was above 5 for 30h on Monday must not show green on Sunday. The reason text says "now" vs "was".
-- Trend uses Theil–Sen (median of pairwise slopes) over the last 3h, so a single door spike doesn't look like warming.
-- A single ERR (30-min step) isn't a gap; two in a row is. ERR readings themselves make the fridge orange.
-- Reports for a date range load 7 days of readings either side as context. An excursion crossing the edge keeps its real start and end and is tagged "started before / continued after this period"; the total counts only the part inside the dates. Gaps, ERR counts and the chart stay inside the dates.
+### Logger registry
 
-## Decisions: storage
+- Readings are stored per logger, not per fridge. The fridge is looked up from the registry by time during analysis, so fixing a wrong assignment later also fixes the history.
+- An assignment's `from` is inclusive and its `to` is exclusive. A time covered by no assignment (logger in transit) belongs to no fridge.
+- `loggers.json` is checked at startup. On a mistake, the app refuses to run and lists every problem:
+  - duplicate IDs;
+  - unusable date formats;
+  - a logger with no assignments;
+  - `to` before `from`;
+  - one logger in two fridges at once;
+  - two loggers in one fridge at once.
 
-- SQLite file `FridgeMonitor.Web/fridges.db`, created on first run with `EnsureCreated()`. No migrations, so cloning and running needs no setup step. Real deployment would switch to migrations.
-- The DB stores readings and uploads only. The registry stays in `loggers.json`: small, versioned with the code, no editing UI yet.
-- Unique index on (LoggerId, Time). Re-uploading the same file (managers do email twice), or a file that overlaps Summer's old sheet, stores nothing new. The upload summary says how many were already stored.
-- If a re-upload has a different value for a stored reading, the stored value is kept and the upload gets a warning. First write wins, so an inspector-facing record never silently changes.
-- Every upload is recorded with its counts and issues, even when it imported nothing, so "why is this fridge empty?" has an answer.
-- Two uploads of the same readings at the same moment (a double tap on a slow phone) both pass the "already stored?" check; the unique index rejects the second. That import is thrown away and run once more, so it reports the readings as already stored instead of showing an error page.
-- A file is treated as Summer's combined sheet if it has a Logger column next to Time and Temp; otherwise it's a single logger export.
-- Analysis loads the last 7 days into memory, plus 7 days before them as context. ~24k rows/week is nothing; years of data would need per-fridge queries or pre-computed excursions.
+  Without these checks, a wrong move date would silently put readings in the wrong fridge.
 
-## Decisions: UI
+### Parser
 
-- Razor Pages, server-rendered, no JavaScript framework. Fast on a phone, nothing to build.
-- Dropped the template's Bootstrap/jQuery. One hand-written mobile-first stylesheet: one column of cards on a phone, 2–3 on wider screens.
-- Visual design from the `ui-ux-pro-max` skill (vendored in `.claude/skills/`, MIT, upstream commit 50d8a7d): ran `--design-system` for "operations monitoring dashboard food safety mobile" (dense, minimal, low motion). Adopted: Swiss/minimal style, slate palette, status green/amber/red, its checklist (4.5:1 contrast, visible keyboard focus, 44px touch targets, `prefers-reduced-motion`, SVG icons not emoji, colour never alone), and the chart text-summary fallback.
-- Rejected from the skill's output: its "Operations Landing" pattern (a marketing hero + trial CTA; this is an internal tool), dark as default (Summer reads it on a phone in daylight; dark follows the OS instead), Fira Code/Fira Sans from Google Fonts (needs internet, and a code font is wrong for a bakery manager; system fonts), GSAP scroll animations (a JS dependency for motion that adds nothing).
-- Chart is SVG drawn on the server (`TempChart`). No CDN or chart library, so it works offline. The line breaks at gaps and ERR instead of drawing across missing data; every reading above 5 gets a red dot, so brief spikes are visible but labelled.
-- Dashboard: count tiles, then problems first (Alarm, Check, No data), OK fridges collapsed below. Each card shows the current temperature, when it was read, and the reasons in plain words. Colour always comes with a text label.
+- Dates: the logger's configured format first, then only year-first ISO formats. It never guesses day-first vs month-first.
+- The unit comes only from the registry. If the file header names a different unit, or the median reading is above 15°C, the upload shows a warning. No silent conversion.
+- Duplicate (logger, time) rows: keep the first. Same time with a different value: warning.
+- A bad row is reported with its line number. The rest of the file is still imported.
+
+### Analysis
+
+- **Excursion** = a run of readings strictly above 5.0°C. Duration = first reading above → first reading back under. If a gap falls inside, it's flagged "includes missing data".
+- **Brief vs alarm** is decided by duration (under 30 min), not reading count, so it still works for a logger that reads every 5 minutes.
+- **Status is the worst thing in the period, not just right now.** Summer reviews weekly. A fridge above 5°C for 30h on Monday must not show green on Sunday. The reason text says "now" or "was".
+- **Trend** uses Theil–Sen (the median of pairwise slopes) over the last 3h, so a single door spike doesn't look like warming.
+- **Gaps:** a single ERR (a 30-min step) isn't a gap; two in a row is. ERR readings themselves make the fridge orange.
+- **Date ranges:** reports load 7 days of readings either side as context. An excursion crossing the edge keeps its real start and end, and is tagged "started before" or "continued after this period". Totals count only the part inside the dates. Gaps, ERR counts and the chart stay inside the dates.
+
+### Storage
+
+- SQLite file `FridgeMonitor.Web/fridges.db`, created on first run with `EnsureCreated()`. No migrations, so clone-and-run needs no setup step. A real deployment would switch to migrations.
+- The database stores readings and uploads only. The registry stays in `loggers.json`: it's small, versioned with the code, and has no editing screen yet.
+- Unique index on (LoggerId, Time). Re-uploading the same file (managers do email it twice), or a file that overlaps Summer's old sheet, stores nothing new. The upload summary says how many readings were already stored.
+- If a re-upload has a different value for a stored reading, the stored value is kept and the upload gets a warning. First write wins, so a record the inspector sees never changes silently.
+- Every upload is recorded with its counts and issues, even when nothing was imported, so "why is this fridge empty?" has an answer.
+- Two uploads of the same readings at the same moment (a double tap on a slow phone) both pass the "already stored?" check, and the unique index rejects the second. That import is thrown away and run once more, so it reports the readings as already stored instead of showing an error page.
+- A file is treated as Summer's combined sheet if it has a Logger column next to Time and Temp. Otherwise it's a single logger's export.
+- Analysis loads the last 7 days into memory, plus 7 days before them as context. ~24k rows a week is nothing. Years of data would need per-fridge queries or pre-computed excursions.
+
+### UI
+
+- Razor Pages, rendered on the server, no JavaScript framework. Fast on a phone, nothing to build.
+- The template's Bootstrap and jQuery are removed. One hand-written mobile-first stylesheet: one column of cards on a phone, 2–3 on wider screens.
+- The visual design comes from the `ui-ux-pro-max` skill (in `.claude/skills/`, MIT licence, upstream commit 50d8a7d). I ran `--design-system` for "operations monitoring dashboard food safety mobile" (dense, minimal, low motion).
+  - **Kept:** Swiss/minimal style; slate palette; status colours green/amber/red; the chart's text summary; its checklist (4.5:1 contrast, visible keyboard focus, 44px touch targets, `prefers-reduced-motion`, SVG icons not emoji, colour never the only signal).
+  - **Rejected:**
+    - the "Operations Landing" pattern (a marketing hero and trial button; this is an internal tool);
+    - dark as default (Summer reads it on a phone in daylight; dark follows the OS setting instead);
+    - Fira Code and Fira Sans from Google Fonts (needs internet, and a code font is wrong for a bakery manager; system fonts instead);
+    - GSAP scroll animations (a JS dependency for motion that adds nothing).
+- The chart is SVG drawn on the server (`TempChart`). No CDN or chart library, so it works offline. The line breaks at gaps and ERR instead of drawing across missing data. Every reading above 5°C gets a red dot, so brief spikes are visible.
+- Dashboard: count tiles first, then problems (Alarm, Check, No data), then OK fridges collapsed below. Each card shows the current temperature, when it was read, and the reasons in plain words. Colour always comes with a text label.
 - "Warning" is labelled "Check" for Summer: it means "look at this", not "something broke".
-- Inspector report: pick one fridge or all, a date range, then print or export CSV. CSV has a BOM so Excel shows ° and Hebrew-safe UTF-8 correctly. Brief spikes are listed and labelled, not hidden: an inspector should see everything.
-- Empty dashboard offers "Load sample week" so a reviewer sees a working app in one click.
-- Uploads over 5 MB are rejected (a week from one logger is ~20 KB).
+- Inspector report: pick one fridge or all, and a date range, then print or export CSV. The CSV starts with a BOM so Excel shows ° and Hebrew correctly as UTF-8. Brief spikes are listed and labelled, not hidden: an inspector should see everything.
+- An empty dashboard offers "Load sample week", so a reviewer sees a working app in one click.
+- Uploads over 5 MB are rejected. A week from one logger is ~20 KB.
 
-## Architecture
+## 4. Architecture
 
-- `FridgeMonitor.Core`: parsing, normalization, analysis. No web/DB dependencies. Fully unit tested.
-- `FridgeMonitor.Web`: Razor Pages UI + EF Core SQLite storage.
-- `FridgeMonitor.Tests`: xUnit, Summer's sample table as the main fixture.
+| Project | What's in it |
+|---|---|
+| `FridgeMonitor.Core` | Parsing, normalization, analysis. No web or database code. Fully unit tested. |
+| `FridgeMonitor.Web` | Razor Pages UI and EF Core SQLite storage. |
+| `FridgeMonitor.Tests` | xUnit, with Summer's sample table as the main fixture. |
 
-Why: Razor Pages is server-rendered and light on phones. SQLite needs no install or account.
-Core separate so the logic is testable without the web layer.
+- Razor Pages: rendered on the server and light on phones.
+- SQLite: no install, no account.
+- Core is separate so the logic can be tested without the web layer.
 
-## Status rules (to confirm with Summer; configurable in appsettings.json)
-
-- Red / Alarm: above 5°C for 30 min or more (now or earlier in the period).
-- Orange / Warning: warming > 0.5°C/h over the last 3h while under 5°C; one reading above 5 at the end; gaps; logger stopped; ERR readings; no logger in the fridge.
-- Green / OK: otherwise. Brief spikes are shown but don't change the colour.
-- Grey / No data: no readings in the period.
-
-## Order of work
+## 5. Order of work
 
 1. Repo, docs, sample data
-2. Domain model + parser + tests (protect this time)
-3. Analysis (excursions, gaps, status) + tests
+2. Domain model, parser and tests (protect this time)
+3. Analysis (excursions, gaps, status) and tests
 4. Storage (SQLite, unique index on LoggerId+Time so re-uploads are harmless)
 5. UI: dashboard, upload, fridge detail, inspector report
-6. README + NOTES
+6. README and NOTES
