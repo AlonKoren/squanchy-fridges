@@ -8,6 +8,7 @@ No accounts, no paid services, no internet needed once packages are restored. Da
 ## Run it
 
 Requirements: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or newer (`dotnet --version`).
+In Visual Studio, use 2022 version 17.8 or later; older versions can't open .NET 8 projects and show hundreds of false errors.
 
 ```bash
 git clone <this repo>
