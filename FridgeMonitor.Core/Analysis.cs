@@ -31,6 +31,14 @@ public sealed record Excursion(
     bool StartedBeforePeriod = false, bool ContinuedAfterPeriod = false)
 {
     public TimeSpan Duration => End - Start;
+
+    /// <summary>The part of this excursion between from and to, for totals over chosen dates.</summary>
+    public TimeSpan DurationWithin(DateTime from, DateTime to)
+    {
+        var start = Start > from ? Start : from;
+        var end = End < to ? End : to;
+        return end > start ? end - start : TimeSpan.Zero;
+    }
 }
 
 /// <summary>The time range being reported on, both ends inclusive.</summary>

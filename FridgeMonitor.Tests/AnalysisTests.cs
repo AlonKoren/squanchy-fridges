@@ -148,6 +148,16 @@ public class AnalysisTests
     }
 
     [Fact]
+    public void Time_above_within_a_day_counts_only_that_day()
+    {
+        var e = Assert.Single(FridgeAnalyzer.Analyze(Fridge, TwoDaysWithLongExcursion(), Monday.End, Options, period: Monday).Excursions);
+
+        Assert.Equal(TimeSpan.FromHours(17.75), e.DurationWithin(Mon, Mon.AddDays(1)));                 // 06:15 to midnight
+        Assert.Equal(TimeSpan.FromHours(16), e.DurationWithin(Mon.AddDays(1), Mon.AddDays(2)));         // midnight to 16:00
+        Assert.Equal(TimeSpan.Zero, e.DurationWithin(Mon.AddDays(2), Mon.AddDays(3)));
+    }
+
+    [Fact]
     public void Excursion_entirely_outside_the_period_is_left_out()
     {
         var evening = new Period(Mon.AddDays(1).AddHours(18), Tuesday.End);
