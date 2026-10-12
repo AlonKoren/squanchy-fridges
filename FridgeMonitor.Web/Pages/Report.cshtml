@@ -40,14 +40,13 @@
 {
     var real = r.Excursions.Where(e => !e.IsBrief).ToList();
     // Count only the part inside the chosen dates; the table shows each excursion's real start and end.
-    var periodEnd = Model.Range.LastDay.AddDays(1);   // midnight after the last day
-    var total = TimeSpan.FromTicks(real.Sum(e => e.DurationWithin(Model.Range.Start, periodEnd).Ticks));
+    var total = TimeSpan.FromTicks(real.Sum(e => e.DurationWithin(Model.Range.Start, Model.Range.EndExclusive).Ticks));
     <h2>@r.Fridge</h2>
     <p class="muted">
         @real.Count time(s) above the limit, @Fmt.Duration(total) of it within these dates.
         @(r.Excursions.Count - real.Count) brief spike(s).
     </p>
-    <partial name="_ExcursionTable" model="r.Excursions" />
+    <partial name="_ExcursionTable" model="new ExcursionTable(r.Excursions, Model.Range)" />
 }
 
 @{

@@ -19,6 +19,7 @@ Every time an AI tool suggested something wrong, or I rejected a suggestion: wha
 | 9 | 12 Oct | Double upload could show an error page | Code review |
 | 10 | 12 Oct | Registry error dates used the server culture | Code review |
 | 11 | 12 Oct | Fridge page total counted time outside the chosen dates | Second code review |
+| 12 | 12 Oct | One-day fridge page showed "34h" twice with no explanation | Testing it myself on a fresh clone |
 
 ## Details
 
@@ -95,3 +96,10 @@ Every time an AI tool suggested something wrong, or I rejected a suggestion: wha
 - **Problem:** once excursions kept their real start and end (#7), Rishon on a one-day chart said ~34h above 5°C, and disagreed with the inspector report.
 - **Caught:** in a second review.
 - **Fix:** `Excursion.DurationWithin`, the test `Time_above_within_a_day_counts_only_that_day`, and commit `3ae992a`.
+
+### 12. "34h" on a one-day page
+
+- **Suggested (Claude Code):** after fix #11, the one-day fridge page still showed the excursion's full length (34h) in the status box and in the table, and the part inside the day (17h 45m) only in small text under the chart.
+- **Problem:** when I checked Rishon for Monday only, I saw "34h" and thought the fix hadn't worked. On a phone the "Continued after this period" tag is off screen, so nothing explained it.
+- **Caught:** testing the app myself from a fresh clone before sending it.
+- **Fix:** the status text now gives the end time ("Mon 14 Sep 06:15 to Tue 15 Sep 16:15"), and the table shows "17h 45m in these dates" under the full length. See the test `Report_for_a_day_shows_the_real_end_not_still_above` and `Pages/Shared/_ExcursionTable.cshtml`.

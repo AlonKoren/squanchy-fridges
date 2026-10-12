@@ -42,11 +42,17 @@ public static class StatusUi
         $"stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\">{paths}</svg>");
 }
 
+/// <summary>Excursions to list, and the dates they're listed for.</summary>
+public sealed record ExcursionTable(IEnumerable<Excursion> Excursions, DateRange Range);
+
 /// <summary>Whole days, first to last inclusive. Defaults to the 7 days ending on the latest reading.</summary>
 public sealed record DateRange(DateTime FirstDay, DateTime LastDay)
 {
     public DateTime Start => FirstDay;
     public DateTime End => LastDay.AddDays(1).AddSeconds(-1);
+
+    /// <summary>Midnight after the last day, for "how much of it was inside these dates".</summary>
+    public DateTime EndExclusive => LastDay.AddDays(1);
 
     // Invariant, so a server culture with another calendar can't break the date inputs.
     public string FirstIso => FirstDay.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);

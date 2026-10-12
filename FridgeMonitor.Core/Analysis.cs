@@ -149,8 +149,8 @@ public static class FridgeAnalyzer
         {
             var longest = past.MaxBy(e => e.Duration)!;
             reasons.Add(new(FridgeStatus.Alarm, past.Count == 1
-                ? $"Was above {limit} for {Fmt.Duration(longest.Duration)} from {Fmt.Time(longest.Start)}"
-                : $"Above {limit} {past.Count} times, longest {Fmt.Duration(longest.Duration)} from {Fmt.Time(longest.Start)}"));
+                ? $"Was above {limit} for {Fmt.Duration(longest.Duration)}, {Fmt.Time(longest.Start)} to {Fmt.Time(longest.End)}"
+                : $"Above {limit} {past.Count} times, longest {Fmt.Duration(longest.Duration)}, {Fmt.Time(longest.Start)} to {Fmt.Time(longest.End)}"));
         }
 
         if (current is null && trend > o.TrendWarnCPerHour)

@@ -38,9 +38,8 @@ public class FridgeModel(FleetService fleet, LoggerRegistry registry) : PageMode
         {
             var temps = valid.Select(r => r.TempC!.Value).ToList();
             // Only the part inside the chosen dates, like the inspector report: the chart shows only these dates.
-            var periodEnd = Range.LastDay.AddDays(1);   // midnight after the last day
             var above = TimeSpan.FromTicks(report.Excursions.Where(e => !e.IsBrief)
-                .Sum(e => e.DurationWithin(Range.Start, periodEnd).Ticks));
+                .Sum(e => e.DurationWithin(Range.Start, Range.EndExclusive).Ticks));
             Stats = (temps.Min(), temps.Max(), temps.Average(), above);
             summary = $"Temperature chart, {Range}: lowest {Fmt.Temp(temps.Min())}, highest {Fmt.Temp(temps.Max())}, " +
                       $"average {Fmt.Temp(temps.Average())}, {Fmt.Duration(above)} above {Fmt.Temp(LimitC)}.";

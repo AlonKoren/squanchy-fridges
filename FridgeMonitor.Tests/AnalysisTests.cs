@@ -135,6 +135,8 @@ public class AnalysisTests
         Assert.Equal(Mon.AddDays(1).AddHours(16), e.End);
         Assert.Equal(FridgeStatus.Alarm, report.Status);
         Assert.DoesNotContain(report.Reasons, r => r.Text.Contains("now"));
+        // The end is in the text, so "34h" on a one-day page clearly runs past that day.
+        Assert.Contains(report.Reasons, r => r.Text.Contains("Mon 14 Sep 06:15 to Tue 15 Sep 16:00"));
     }
 
     [Fact]

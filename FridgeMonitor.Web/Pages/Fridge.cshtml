@@ -54,7 +54,7 @@
 }
 else
 {
-    <partial name="_ExcursionTable" model="r.Excursions" />
+    <partial name="_ExcursionTable" model="new ExcursionTable(r.Excursions, Model.Range)" />
 }
 <div class="actions">
     <a class="button secondary" asp-page="/Report" asp-route-f="@($"{Model.Key.Branch}|{Model.Key.Fridge}")"

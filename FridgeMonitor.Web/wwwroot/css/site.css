@@ -223,6 +223,8 @@ tr.brief td { color: var(--muted); }
 @media (max-width: 600px) {
     .chart .axis, .chart .limit-label { font-size: 22px; }
     .chart .line { stroke-width: 3; }
+    /* Start, end and duration fit on a phone without scrolling the table. */
+    th, td { padding: 10px 8px; }
 }
 .chart-summary { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); margin: var(--space-2) 0 0; font-size: .875rem; color: var(--muted); }
 .chart-summary strong { color: var(--text); font-variant-numeric: tabular-nums; }
