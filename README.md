@@ -15,7 +15,7 @@ Requirements: [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) or 
 In Visual Studio, use 2022 version 17.8 or later; older versions can't open .NET 8 projects and show hundreds of false errors.
 
 ```bash
-git clone <this repo>
+git clone https://github.com/AlonKoren/squanchy-fridges.git
 cd squanchy-fridges
 dotnet run --project FridgeMonitor.Web
 ```
