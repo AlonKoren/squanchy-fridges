@@ -70,8 +70,8 @@ Every time an AI tool suggested something wrong, or I rejected a suggestion: wha
 
 ### 8. Second UI redesign
 
-- **Suggested (Claude Code):** redesign the dashboard as a branch-by-branch "ops sheet", to look less generated.
-- **Problem:** when I looked at the result, it simply looked worse than the design it replaced. Looking "less generated" isn't worth a worse page for Summer.
+- **Suggested (Claude Code):** redesign the dashboard as a branch-by-branch "ops sheet".
+- **Problem:** when I looked at the result, it looked worse than the design it replaced, so the change wasn't worth it.
 - **Decision:** I didn't keep it and went back to the previous design.
 - **Fix:** reset to `9833a6c`, so it isn't in the history.
 
